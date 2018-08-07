@@ -19,8 +19,9 @@ for pkt in cap:
         number.append(1)
         length.append(int(pkt.length))
 
-print('{:^10s} | {:^10s} | {:^10s}'.format("Type", "Number", "Length"))
-print('------------------------------------')
+print('----------------------------------------')
+print('| {:^10s} | {:^10s} | {:^10s} |'.format("Type", "Number", "Length"))
+print('----------------------------------------')
 for i in range(0, len(type)):
-    print('{:^10s} | {:^10s} | {:^10s}'.format(str(type[i]), str(number[i]), str(length[i])))
-    print('------------------------------------')
+    print('| {:^10s} | {:^10s} | {:^10s} |'.format(str(type[i]), str(number[i]), str(length[i])))
+    print('----------------------------------------')
