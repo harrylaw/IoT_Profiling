@@ -5,7 +5,7 @@
 
     python3 extract-protocols.py <path_to_pcag_file>
     
-**2. Extract hostname from a .pcap file:**
+**2. Extract DHCP hostname from a .pcap file:**
     
     python3 hostname.py <path_to_pcag_file>
 
