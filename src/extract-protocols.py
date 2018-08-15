@@ -45,7 +45,7 @@ def quick_sort(arr_to_sort, arr1, arr2, low, high):
 
 def calculate_average_length():
     for i in range(0, len(lengths)):
-        average_lengths.append('%.2f' % (lengths[i]/numbers[i]))
+        average_lengths.append('{:.2f}'.format(lengths[i]/numbers[i]))
 
 
 def format_print():
@@ -60,7 +60,7 @@ def format_print():
         print('-----------------------------------------------------')
         total_number = total_number + numbers[i]
         total_length = total_length + lengths[i]
-    print('Overall Average Length: ', '%.2f' % (total_length/total_number))
+    print('Overall Average Length: ', '{:.2f}'.format(total_length/total_number))
 
 
 for pkt in cap:
