@@ -5,6 +5,7 @@ cap = pyshark.FileCapture(sys.argv[1], only_summaries=True)
 protocols = []
 numbers = []
 lengths = []
+average_lengths = []
 
 
 def partition(arr_to_sort, arr1, arr2, low, high):
@@ -42,13 +43,24 @@ def quick_sort(arr_to_sort, arr1, arr2, low, high):
         quick_sort(arr_to_sort, arr1, arr2, pi + 1, high)
 
 
+def calculate_average_length():
+    for i in range(0, len(lengths)):
+        average_lengths.append('%.2f' % (lengths[i]/numbers[i]))
+
+
 def format_print():
-    print('----------------------------------------')
-    print('| {:^10s} | {:^10s} | {:^10s} |'.format("Protocols", "Numbers", "Lengths"))
-    print('----------------------------------------')
+    total_number = 0
+    total_length = 0
+    print('-----------------------------------------------------')
+    print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format("Protocol", "Number", "Length", "Avg Length"))
+    print('-----------------------------------------------------')
     for i in range(0, len(protocols)):
-        print('| {:^10s} | {:^10s} | {:^10s} |'.format(str(protocols[i]), str(numbers[i]), str(lengths[i])))
-        print('----------------------------------------')
+        print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format(str(protocols[i]), str(numbers[i]), str(lengths[i]),
+                                                                 str(average_lengths[i])))
+        print('-----------------------------------------------------')
+        total_number = total_number + numbers[i]
+        total_length = total_length + lengths[i]
+    print('Overall Average Length: ', '%.2f' % (total_length/total_number))
 
 
 for pkt in cap:
@@ -63,4 +75,5 @@ for pkt in cap:
         numbers.append(1)
         lengths.append(int(pkt.length))
 quick_sort(protocols, numbers, lengths, 0, len(protocols) - 1)
+calculate_average_length()
 format_print()
