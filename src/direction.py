@@ -17,7 +17,7 @@ for pkt in cap:
             pair = [pkt.ip.src, pkt.ip.dst]
             summary.append(pair)
             size.append(int(pkt.length))
-            protocol.append(pkt.highest_layer)
+            
 
     except AttributeError as e:
             pass
