@@ -12,10 +12,10 @@ def partition(arr_to_sort, arr1, low, high):
 
     for j in range(low, high):
 
-        # If current element is smaller than or
+        # If current element is larger than or
         # equal to pivot
-        if arr_to_sort[j] <= pivot:
-            # increment index of smaller element
+        if arr_to_sort[j] >= pivot:
+            # increment index of larger element
             i = i + 1
             arr_to_sort[i], arr_to_sort[j] = arr_to_sort[j], arr_to_sort[i]
             arr1[i], arr1[j] = arr1[j], arr1[i]
