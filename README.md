@@ -11,5 +11,3 @@ Automated tools to profile and discover IoT devices
 
     `pip3 install pyshark`
     
-    
-    Testing 123
