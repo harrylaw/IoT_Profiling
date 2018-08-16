@@ -6,6 +6,7 @@ protocols = []
 numbers = []
 lengths = []
 average_lengths = []
+percentages = []
 
 
 def partition(arr_to_sort, arr1, arr2, low, high):
@@ -51,29 +52,43 @@ def calculate_average_length():
 def format_print():
     total_number = 0
     total_length = 0
-    print('-----------------------------------------------------')
-    print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format("Protocol", "Number", "Length", "Avg Length"))
-    print('-----------------------------------------------------')
+    print('------------------------------------------------------------------')
+    print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format("Protocol", "Number", "Length", "Avg Length",
+                                                                       "Percentage"))
+    print('------------------------------------------------------------------')
     for i in range(0, len(protocols)):
-        print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format(str(protocols[i]), str(numbers[i]), str(lengths[i]),
-                                                                 str(average_lengths[i])))
-        print('-----------------------------------------------------')
+        print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format(str(protocols[i]), str(numbers[i]),
+                                                                           str(lengths[i]), str(average_lengths[i]),
+                                                                           str(percentages[i])))
+        print('------------------------------------------------------------------')
         total_number = total_number + numbers[i]
         total_length = total_length + lengths[i]
     print('Overall Average Length: ', '{:.2f}'.format(total_length/total_number))
 
 
-for pkt in cap:
-    for protocol in protocols:
-        if protocol == pkt.protocol:
-            index = protocols.index(protocol)
-            numbers[index] = numbers[index] + 1
-            lengths[index] = lengths[index] + int(pkt.length)
-            break
-    else:
-        protocols.append(pkt.protocol)
-        numbers.append(1)
-        lengths.append(int(pkt.length))
+def create_list():
+    for pkt in cap:
+        for i in range(0, len(protocols)):
+            if protocols[i] == pkt.protocol:
+                numbers[i] = numbers[i] + 1
+                lengths[i] = lengths[i] + int(pkt.length)
+                break
+        else:
+            protocols.append(pkt.protocol)
+            numbers.append(1)
+            lengths.append(int(pkt.length))
+
+
+def calculate_percentage():
+    total_number = 0
+    for i in range(0, len(numbers)):
+        total_number = total_number + numbers[i]
+    for i in range(0, len(protocols)):
+        percentages.append('{:.4f}'.format(numbers[i]/total_number))
+
+
+create_list()
 quick_sort(protocols, numbers, lengths, 0, len(protocols) - 1)
 calculate_average_length()
+calculate_percentage()
 format_print()
