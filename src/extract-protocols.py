@@ -87,8 +87,9 @@ def calculate_percentage():
         percentages.append('{:.4f}'.format(numbers[i]/total_number))
 
 
-create_list()
-quick_sort(protocols, numbers, lengths, 0, len(protocols) - 1)
-calculate_average_length()
-calculate_percentage()
-format_print()
+if __name__ == "__main__":
+    create_list()
+    quick_sort(protocols, numbers, lengths, 0, len(protocols) - 1)
+    calculate_average_length()
+    calculate_percentage()
+    format_print()

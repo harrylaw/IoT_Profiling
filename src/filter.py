@@ -17,7 +17,7 @@ def print_list():
 
 
 def ask_for_device():
-    device_number = int(input("Please select the device you want to profile. (Enter device no.)"))
+    device_number = int(input("Please select the device you want to profile. (Enter device no.) "))
     print("You selected: " + Manufacturers[device_number])
     return device_number
 
@@ -73,5 +73,13 @@ def filter_devices(cap):
     print_list()
     index = ask_for_device()
     return IPs[index]
+
+
+if __name__ == "__main__":
+    import pyshark
+    import sys
+
+    cap = pyshark.FileCapture(sys.argv[1])
+    print(filter_devices(cap))
 
 
