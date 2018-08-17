@@ -136,10 +136,14 @@ def If_shy(rate):
 def If_uploader(dif):
 	if dif>0 and abs(dif)>0.3:
 		return 1
+	else:
+		return 0
 
 def If_downloader(dif):
 	if dif<0 and abs(dif)>0.3:
 		return 1
+	else:
+		return 0
 
 
 def Check_premuim():
@@ -164,7 +168,7 @@ def Check_Uploader():
 	return urate
 
 def Check_other():
-	if Check_premuim()<0.5 and Check_Bulb()<0.5 and Check_strip()< 0.5:
+	if Check_premuim()<0.7 and Check_Bulb()<0.7 and Check_strip()< 0.7 and Check_Uploader()<0.7:
 		return 1		
 
 
