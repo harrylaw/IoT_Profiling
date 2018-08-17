@@ -1,14 +1,21 @@
 import pyshark
 import sys
 import ipaddress
+from f import filter_devices
 cap = pyshark.FileCapture(sys.argv[1])
 cap2 = pyshark.FileCapture(sys.argv[1], only_summaries=True)
+ip = filter_devices(cap)
 def U_D_Rate(ip):
 	uploadesize = 0
 	downloadesize = 0
 	for pkt in cap:
 		try:
-			if pkt.ip.src == ip:
+			if ipaddress.ip_address(pkt.ip.src).is_multicast or ipaddress.ip_address(pkt.ip.dst).is_multicast:
+				continue
+			elif pkt.ip.src == '255.255.255.255' or pkt.ip.dst == '255.255.255.255':
+				continue
+
+			elif pkt.ip.src == ip:
 				uploadesize = uploadesize + int(pkt.length)
 			elif pkt.ip.dst == ip:
 				downloadesize = downloadesize + int(pkt.length)
@@ -17,8 +24,7 @@ def U_D_Rate(ip):
 
 	urate = uploadesize/(uploadesize+downloadesize)
 	drate = downloadesize/(downloadesize+uploadesize)
-	print ("Upload Rate:",urate)
-	print("Download Rate:",drate)
+	return urate-drate
 
 def L_C_Rate():
 	local = 0
@@ -127,6 +133,14 @@ def If_shy(rate):
 		return 1
 	else:
 		return 0
+def If_uploader(dif):
+	if dif>0 and abs(dif)>0.3:
+		return 1
+
+def If_downloader(dif):
+	if dif<0 and abs(dif)>0.3:
+		return 1
+
 
 def Check_premuim():
 
@@ -145,11 +159,19 @@ def Check_strip():
 	else:
 		return srate2
 
+def Check_Uploader():
+	urate = 0.8*If_uploader(U_D_Rate(ip)) + 0.1*If_talkative(Rate()) + 0.1*If_IoT(protocol_list())
+	return urate
+
 def Check_other():
 	if Check_premuim()<0.5 and Check_Bulb()<0.5 and Check_strip()< 0.5:
 		return 1		
 
 
+if If_uploader(U_D_Rate(ip)):
+	print("Uploader")
+if If_downloader(U_D_Rate(ip)):
+	print("Downloader")
 if If_IoT(protocol_list()):
 	print("IoT")
 if If_unreliable(protocol_list()):
@@ -176,6 +198,7 @@ if If_shy(Rate()):
 print("Voice Assistant Score:",Check_premuim())
 print("Bulb Score:",Check_Bulb())
 print("Strip Score",Check_strip())
+print("Sensor Score:",Check_Uploader())
 if Check_other():
 	print("Other devices")
 
