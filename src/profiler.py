@@ -1,7 +1,7 @@
 import pyshark
 import sys
 import ipaddress
-from f import filter_devices
+from filter import filter_devices
 cap = pyshark.FileCapture(sys.argv[1])
 cap2 = pyshark.FileCapture(sys.argv[1], only_summaries=True)
 ip = filter_devices(cap)
