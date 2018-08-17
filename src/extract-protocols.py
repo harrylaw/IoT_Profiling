@@ -1,7 +1,3 @@
-import pyshark
-import sys
-
-cap = pyshark.FileCapture(sys.argv[1], only_summaries=True)
 protocols = []
 numbers = []
 lengths = []
@@ -66,7 +62,7 @@ def format_print():
     print('Overall Average Length: ', '{:.2f}'.format(total_length/total_number))
 
 
-def create_list():
+def create_list(cap):
     for pkt in cap:
         for i in range(0, len(protocols)):
             if protocols[i] == pkt.protocol:
@@ -87,9 +83,17 @@ def calculate_percentage():
         percentages.append('{:.4f}'.format(numbers[i]/total_number))
 
 
-if __name__ == "__main__":
-    create_list()
+def extract_protocols(cap):
+    create_list(cap)
     quick_sort(protocols, numbers, lengths, 0, len(protocols) - 1)
     calculate_average_length()
     calculate_percentage()
     format_print()
+
+
+if __name__ == "__main__":
+    import pyshark
+    import sys
+
+    cap = pyshark.FileCapture(sys.argv[1], only_summaries=True)
+    extract_protocols(cap)
