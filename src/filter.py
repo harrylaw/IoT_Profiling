@@ -9,12 +9,13 @@ OUIs = []
 
 
 def format_print():
-    print('-------------------------------------------------')
-    print('| {:^17s} | {:^11s} | {:^11s} |'.format("MAC", "IP", "OUI"))
-    print('-------------------------------------------------')
+    print('-----------------------------------------------------')
+    print('| {:^17s} | {:^15s} | {:^11s} |'.format("MAC", "IP", "OUI"))
+    print('-----------------------------------------------------')
     for i in range(0, len(MACs)):
-        print('| {:^17s} | {:^11s} | {:^11s} |'.format(str(MACs[i]), str(IPs[i]), str(OUIs[i])))
-        print('-------------------------------------------------')
+        if str(OUIs[i]) != "None":
+            print('| {:^17s} | {:^15s} | {:^11s} |'.format(str(MACs[i]), str(IPs[i]), str(OUIs[i])))
+            print('-----------------------------------------------------')
 
 
 def create_list():
@@ -22,6 +23,11 @@ def create_list():
     for pkt in cap:
             for i in range(0, len(MACs)):
                 if MACs[i] == pkt.eth.src:
+                    try:
+                        if IPs[i] == "" or IPs[i] == "0.0.0.0":
+                            IPs[i] = pkt.ip.src
+                    except AttributeError:
+                        pass
                     break
             else:
                 MACs.append(pkt.eth.src)
@@ -33,6 +39,11 @@ def create_list():
 
             for i in range(0, len(MACs)):
                 if MACs[i] == pkt.eth.dst:
+                    try:
+                        if IPs[i] == "" or IPs[i] == "0.0.0.0":
+                            IPs[i] = pkt.ip.dst
+                    except AttributeError:
+                        pass
                     break
             else:
                 MACs.append(pkt.eth.dst)
@@ -43,6 +54,15 @@ def create_list():
                 OUIs.append(p.get_manuf(pkt.eth.dst))
 
 
+def print_ip_address():
+    for pkt in cap:
+        try:
+            print(pkt.ip.src)
+        except AttributeError:
+            pass
+
+
 create_list()
 format_print()
+# print_ip_address()
 
