@@ -79,5 +79,5 @@ if __name__ == "__main__":
     import pyshark
     import sys
 
-    cap = pyshark.FileCapture(sys.argv[1])
+    cap = pyshark.FileCapture(sys.argv[1])  # should not use only_summaries
     print(filter_devices(cap))

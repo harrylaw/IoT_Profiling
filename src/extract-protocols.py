@@ -95,5 +95,5 @@ if __name__ == "__main__":
     import pyshark
     import sys
 
-    cap = pyshark.FileCapture(sys.argv[1], only_summaries=True)
+    cap = pyshark.FileCapture(sys.argv[1], only_summaries=True)  # should use only_summaries
     extract_protocols(cap)
