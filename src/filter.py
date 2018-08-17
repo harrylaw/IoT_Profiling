@@ -1,9 +1,6 @@
-import pyshark
-import sys
 from manuf import manuf
 import ipaddress
 
-cap = pyshark.FileCapture(sys.argv[1])
 MACs = []
 IPs = []
 Manufacturers = []
@@ -25,7 +22,7 @@ def ask_for_device():
     return device_number
 
 
-def create_list():
+def create_list(cap):
     mac_parser = manuf.MacParser(update=True)
     for pkt in cap:
             for i in range(0, len(MACs)):
@@ -71,8 +68,8 @@ def create_list():
                         IPs.append("")
 
 
-def filter_devices():
-    create_list()
+def filter_devices(cap):
+    create_list(cap)
     print_list()
     index = ask_for_device()
     return IPs[index]
