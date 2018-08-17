@@ -7,6 +7,7 @@ Manufacturers = []
 
 
 def print_list():
+    print()
     print('{:^60s}'.format("Device List"))
     print('--------------------------------------------------------------')
     print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format("No.", "MAC", "IP", "Manufacturer"))
@@ -14,6 +15,7 @@ def print_list():
     for i in range(0, len(MACs)):
         print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format(str(i), str(MACs[i]), str(IPs[i]), str(Manufacturers[i])))
         print('--------------------------------------------------------------')
+    print()
 
 
 def ask_for_device():
