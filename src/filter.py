@@ -18,11 +18,12 @@ def print_list():
 
 def ask_for_device():
     device_number = int(input("Please select the device you want to profile. (Enter device no.) "))
-    print("You selected: " + Manufacturers[device_number])
+    print("Now profiling: " + Manufacturers[device_number])
     return device_number
 
 
 def create_list(cap):
+    print("Please wait while we generate the device list.")
     mac_parser = manuf.MacParser(update=True)
     for pkt in cap:
             for i in range(0, len(MACs)):
