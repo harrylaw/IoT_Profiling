@@ -81,5 +81,3 @@ if __name__ == "__main__":
 
     cap = pyshark.FileCapture(sys.argv[1])
     print(filter_devices(cap))
-
-
