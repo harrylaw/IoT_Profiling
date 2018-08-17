@@ -1,68 +1,80 @@
 import pyshark
 import sys
 from manuf import manuf
+import ipaddress
 
 cap = pyshark.FileCapture(sys.argv[1])
 MACs = []
 IPs = []
-OUIs = []
+Manufacturers = []
 
 
-def format_print():
-    print('-----------------------------------------------------')
-    print('| {:^17s} | {:^15s} | {:^11s} |'.format("MAC", "IP", "OUI"))
-    print('-----------------------------------------------------')
+def print_list():
+    print('{:^60s}'.format("Device List"))
+    print('--------------------------------------------------------------')
+    print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format("No.", "MAC", "IP", "Manufacturer"))
+    print('--------------------------------------------------------------')
     for i in range(0, len(MACs)):
-        if str(OUIs[i]) != "None":
-            print('| {:^17s} | {:^15s} | {:^11s} |'.format(str(MACs[i]), str(IPs[i]), str(OUIs[i])))
-            print('-----------------------------------------------------')
+        print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format(str(i), str(MACs[i]), str(IPs[i]), str(Manufacturers[i])))
+        print('--------------------------------------------------------------')
+
+
+def ask_for_device():
+    device_number = int(input("Please select the device you want to profile. (Enter device no.)"))
+    print("You selected: " + Manufacturers[device_number])
+    return device_number
 
 
 def create_list():
-    p = manuf.MacParser(update=True)
+    mac_parser = manuf.MacParser(update=True)
     for pkt in cap:
             for i in range(0, len(MACs)):
                 if MACs[i] == pkt.eth.src:
                     try:
-                        if IPs[i] == "" or IPs[i] == "0.0.0.0":
+                        if IPs[i] == "" and pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
                             IPs[i] = pkt.ip.src
                     except AttributeError:
                         pass
                     break
             else:
-                MACs.append(pkt.eth.src)
-                try:
-                    IPs.append(pkt.ip.src)
-                except AttributeError:
-                    IPs.append("")
-                OUIs.append(p.get_manuf(pkt.eth.src))
+                manufacturer = mac_parser.get_manuf(pkt.eth.src)
+                if str(manufacturer) != "None":
+                    MACs.append(pkt.eth.src)
+                    Manufacturers.append(manufacturer)
+                    try:
+                        if pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
+                            IPs.append(pkt.ip.src)
+                        else:
+                            raise AttributeError
+                    except AttributeError:
+                        IPs.append("")
 
             for i in range(0, len(MACs)):
                 if MACs[i] == pkt.eth.dst:
                     try:
-                        if IPs[i] == "" or IPs[i] == "0.0.0.0":
+                        if IPs[i] == "" and pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
                             IPs[i] = pkt.ip.dst
                     except AttributeError:
                         pass
                     break
             else:
-                MACs.append(pkt.eth.dst)
-                try:
-                    IPs.append(pkt.ip.dst)
-                except AttributeError:
-                    IPs.append("")
-                OUIs.append(p.get_manuf(pkt.eth.dst))
+                manufacturer = mac_parser.get_manuf(pkt.eth.dst)
+                if str(manufacturer) != "None":
+                    MACs.append(pkt.eth.dst)
+                    Manufacturers.append(manufacturer)
+                    try:
+                        if pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
+                            IPs.append(pkt.ip.dst)
+                        else:
+                            raise AttributeError
+                    except AttributeError:
+                        IPs.append("")
 
 
-def print_ip_address():
-    for pkt in cap:
-        try:
-            print(pkt.ip.src)
-        except AttributeError:
-            pass
+def filter_devices():
+    create_list()
+    print_list()
+    index = ask_for_device()
+    return IPs[index]
 
-
-create_list()
-format_print()
-# print_ip_address()
 
