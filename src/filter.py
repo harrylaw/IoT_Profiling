@@ -19,9 +19,15 @@ def print_list():
 
 
 def ask_for_device():
-    device_number = int(input("Please select the device you want to profile. (Enter device no.) "))
-    print("You selected: " + Manufacturers[device_number])
-    return device_number
+    while True:
+        try:
+            device_number = int(input("Please select the device you want to profile. (Enter device no.) "))
+            if device_number < 0 or device_number > len(Manufacturers) - 1:
+                raise ValueError
+            print("You selected: " + Manufacturers[device_number])
+            return device_number
+        except ValueError:
+            print("Invalid input! Please try again.")
 
 
 def create_list(cap):
@@ -86,14 +92,14 @@ def filter_packets(device_number, cap, cap_sum):
     for pkt in cap_sum:
         while pkt.no > packet_number[0]:
             packet_number.remove(packet_number[0])
-        if len(packet_number) == 0:
-            break
+            if len(packet_number) == 0:
+                break
 
         if pkt.no == packet_number[0]:
             filtered_cap_sum.append(pkt)
             packet_number.remove(packet_number[0])
-        if len(packet_number) == 0:
-            break
+            if len(packet_number) == 0:
+                break
 
     print("...Done")
     print("Now profiling: " + Manufacturers[device_number])
