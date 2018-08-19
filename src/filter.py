@@ -92,15 +92,15 @@ def filter_packets(device_number, cap, cap_sum):
     for pkt in cap_sum:
         while pkt.no > packet_number[0]:
             packet_number.remove(packet_number[0])
-            if len(packet_number) == 0:
+            if not packet_number:
                 break
-        if len(packet_number) == 0:
+        if not packet_number:
             break
 
         if pkt.no == packet_number[0]:
             filtered_cap_sum.append(pkt)
             packet_number.remove(packet_number[0])
-        if len(packet_number) == 0:
+        if not packet_number:
             break
 
     print("...Done")
