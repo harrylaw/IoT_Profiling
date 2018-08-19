@@ -82,7 +82,7 @@ def filter_packets(device_number, cap, cap_sum):
     filtered_cap_sum = []
     packet_number = []
 
-    print("Now filtering packets", end="")
+    print("Now filtering packets", end="", flush=True)
 
     for pkt in cap:
         if MACs[device_number] == pkt.eth.src or MACs[device_number] == pkt.eth.dst:
