@@ -76,25 +76,19 @@ def filter_packets(device_number, cap, cap_sum):
     filtered_cap_sum = []
     packet_number = []
 
-    # print("len(cap) = " + str(len(cap)))
-
     for pkt in cap:
         if MACs[device_number] == pkt.eth.src or MACs[device_number] == pkt.eth.dst:
             filtered_cap.append(pkt)
             packet_number.append(pkt.number)
 
-    # print("str(len(packet_number)) = " + str(len(packet_number)))
-
     for pkt in cap_sum:
         if pkt.no > packet_number[0]:
             packet_number.remove(packet_number[0])
-        print("pkt.no = " + str(pkt.no) + " packet_number[0] = " + str(packet_number[0]))
         if pkt.no == packet_number[0]:
             filtered_cap_sum.append(pkt)
             packet_number.remove(packet_number[0])
-
-    # print("len(filtered_cap) = " + str(len(filtered_cap)))
-    # print("len(filtered_cap_sum) = " + str(len(filtered_cap_sum)))
+        if len(packet_number) == 0:
+            break
     return filtered_cap, filtered_cap_sum
 
 
@@ -112,5 +106,9 @@ if __name__ == "__main__":
 
     cap = pyshark.FileCapture(sys.argv[1])  # should not use only_summaries
     cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
-    device_number, filtered_cap, filtered_cap_sum = filter_devices(cap, cap_sum)
+    ip, filtered_cap, filtered_cap_sum = filter_devices(cap, cap_sum)
+    for pkt in filtered_cap:
+        print("1 " + str(pkt.number))
 
+    for pkt in filtered_cap_sum:
+        print("2 " + str(pkt.no))
