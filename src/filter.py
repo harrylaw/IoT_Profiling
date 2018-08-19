@@ -94,12 +94,14 @@ def filter_packets(device_number, cap, cap_sum):
             packet_number.remove(packet_number[0])
             if len(packet_number) == 0:
                 break
+        if len(packet_number) == 0:
+            break
 
         if pkt.no == packet_number[0]:
             filtered_cap_sum.append(pkt)
             packet_number.remove(packet_number[0])
-            if len(packet_number) == 0:
-                break
+        if len(packet_number) == 0:
+            break
 
     print("...Done")
     print("Now profiling: " + Manufacturers[device_number])
