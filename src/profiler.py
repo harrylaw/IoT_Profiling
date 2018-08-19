@@ -2,9 +2,9 @@ import pyshark
 import sys
 import ipaddress
 from filter import filter_devices
-cap = pyshark.FileCapture(sys.argv[1])
-cap2 = pyshark.FileCapture(sys.argv[1], only_summaries=True)
-ip = filter_devices(cap)
+cap_unfiltered = pyshark.FileCapture(sys.argv[1])
+cap_sum_unfiltered = pyshark.FileCapture(sys.argv[1], only_summaries=True)
+ip,cap,cap_sum = filter_devices(cap_unfiltered,cap_sum_unfiltered)
 def U_D_Rate(ip):
 	uploadesize = 0
 	downloadesize = 0
@@ -50,7 +50,7 @@ def Rate():
 	i = 0
 	time = []
 	size = 0
-	for pkt in cap2:
+	for pkt in cap_sum:
 		time.append(pkt.time)
 		size = size + float(pkt.length)
 		i = i+1
@@ -60,7 +60,7 @@ def Rate():
 
 def protocol_list():
 	protocols = []
-	for pkt in cap2:
+	for pkt in cap_sum:
 		for i in range(0, len(protocols)):
 			if protocols[i] == pkt.protocol:
 				break
