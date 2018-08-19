@@ -20,7 +20,7 @@ def print_list():
 
 def ask_for_device():
     device_number = int(input("Please select the device you want to profile. (Enter device no.) "))
-    print("Now profiling: " + Manufacturers[device_number])
+    print("You selected: " + Manufacturers[device_number])
     return device_number
 
 
@@ -76,19 +76,27 @@ def filter_packets(device_number, cap, cap_sum):
     filtered_cap_sum = []
     packet_number = []
 
+    print("Now filtering packets", end="")
+
     for pkt in cap:
         if MACs[device_number] == pkt.eth.src or MACs[device_number] == pkt.eth.dst:
             filtered_cap.append(pkt)
             packet_number.append(pkt.number)
 
     for pkt in cap_sum:
-        if pkt.no > packet_number[0]:
+        while pkt.no > packet_number[0]:
             packet_number.remove(packet_number[0])
+        if len(packet_number) == 0:
+            break
+
         if pkt.no == packet_number[0]:
             filtered_cap_sum.append(pkt)
             packet_number.remove(packet_number[0])
         if len(packet_number) == 0:
             break
+
+    print("...Done")
+    print("Now profiling: " + Manufacturers[device_number])
     return filtered_cap, filtered_cap_sum
 
 
@@ -107,8 +115,8 @@ if __name__ == "__main__":
     cap = pyshark.FileCapture(sys.argv[1])  # should not use only_summaries
     cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
     ip, filtered_cap, filtered_cap_sum = filter_devices(cap, cap_sum)
-    for pkt in filtered_cap:
-        print("1 " + str(pkt.number))
-
-    for pkt in filtered_cap_sum:
-        print("2 " + str(pkt.no))
+    # for pkt in filtered_cap:
+    #     print("1 " + str(pkt.number))
+    #
+    # for pkt in filtered_cap_sum:
+    #     print("2 " + str(pkt.no))
