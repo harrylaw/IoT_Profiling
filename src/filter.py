@@ -85,12 +85,12 @@ def filter_packets(device_number, cap, cap_sum):
 
     # print("str(len(packet_number)) = " + str(len(packet_number)))
 
-    for pkt1 in cap_sum:
-        if pkt1.no > packet_number[0]:
+    for pkt in cap_sum:
+        if pkt.no > packet_number[0]:
             packet_number.remove(packet_number[0])
-        print("pkt1.no = " + str(pkt1.no) + " packet_number[0] = " + str(packet_number[0]))
-        if pkt1.no == packet_number[0]:
-            filtered_cap_sum.append(pkt1)
+        print("pkt.no = " + str(pkt.no) + " packet_number[0] = " + str(packet_number[0]))
+        if pkt.no == packet_number[0]:
+            filtered_cap_sum.append(pkt)
             packet_number.remove(packet_number[0])
 
     # print("len(filtered_cap) = " + str(len(filtered_cap)))
@@ -103,7 +103,7 @@ def filter_devices(cap, cap_sum):
     print_list()
     device_number = ask_for_device()
     filtered_cap, filtered_cap_sum = filter_packets(device_number, cap, cap_sum)
-    return filtered_cap, filtered_cap_sum
+    return IPs[device_number], filtered_cap, filtered_cap_sum
 
 
 if __name__ == "__main__":
@@ -112,5 +112,5 @@ if __name__ == "__main__":
 
     cap = pyshark.FileCapture(sys.argv[1])  # should not use only_summaries
     cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
-    filtered_cap, filtered_cap_sum = filter_devices(cap, cap_sum)
+    device_number, filtered_cap, filtered_cap_sum = filter_devices(cap, cap_sum)
 
