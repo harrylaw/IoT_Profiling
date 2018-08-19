@@ -71,11 +71,39 @@ def create_list(cap):
                         IPs.append("")
 
 
-def filter_devices(cap):
+def filter_packets(device_number, cap, cap_sum):
+    filtered_cap = []
+    filtered_cap_sum = []
+    packet_number = []
+
+    # print("len(cap) = " + str(len(cap)))
+
+    for pkt in cap:
+        if MACs[device_number] == pkt.eth.src or MACs[device_number] == pkt.eth.dst:
+            filtered_cap.append(pkt)
+            packet_number.append(pkt.number)
+
+    # print("str(len(packet_number)) = " + str(len(packet_number)))
+
+    for pkt1 in cap_sum:
+        if pkt1.no > packet_number[0]:
+            packet_number.remove(packet_number[0])
+        print("pkt1.no = " + str(pkt1.no) + " packet_number[0] = " + str(packet_number[0]))
+        if pkt1.no == packet_number[0]:
+            filtered_cap_sum.append(pkt1)
+            packet_number.remove(packet_number[0])
+
+    # print("len(filtered_cap) = " + str(len(filtered_cap)))
+    # print("len(filtered_cap_sum) = " + str(len(filtered_cap_sum)))
+    return filtered_cap, filtered_cap_sum
+
+
+def filter_devices(cap, cap_sum):
     create_list(cap)
     print_list()
-    index = ask_for_device()
-    return IPs[index]
+    device_number = ask_for_device()
+    filtered_cap, filtered_cap_sum = filter_packets(device_number, cap, cap_sum)
+    return filtered_cap, filtered_cap_sum
 
 
 if __name__ == "__main__":
@@ -83,4 +111,6 @@ if __name__ == "__main__":
     import sys
 
     cap = pyshark.FileCapture(sys.argv[1])  # should not use only_summaries
-    print(filter_devices(cap))
+    cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
+    filtered_cap, filtered_cap_sum = filter_devices(cap, cap_sum)
+
