@@ -90,30 +90,30 @@ def create_list(cap):
 def filter_packets(device_number, cap, cap_sum):
     filtered_cap = []
     filtered_cap_sum = []
-    packet_number = []
+    packet_numbers = []
 
     print("Now filtering packets", end="", flush=True)
 
     for pkt in cap:
         if MACs[device_number] == pkt.eth.src or MACs[device_number] == pkt.eth.dst:
             filtered_cap.append(pkt)
-            packet_number.append(pkt.number)
+            packet_numbers.append(pkt.number)
 
     for pkt in cap_sum:
-        if int(pkt.no) < int(packet_number[0]):
+        if int(pkt.no) < int(packet_numbers[0]):
             continue
-            
-        while int(pkt.no) > int(packet_number[0]):
-            packet_number.remove(packet_number[0])
-            if not packet_number:
+
+        while int(pkt.no) > int(packet_numbers[0]):
+            packet_numbers.remove(packet_numbers[0])
+            if not packet_numbers:
                 break
-        if not packet_number:
+        if not packet_numbers:
             break
 
-        if pkt.no == packet_number[0]:
+        if pkt.no == packet_numbers[0]:
             filtered_cap_sum.append(pkt)
-            packet_number.remove(packet_number[0])
-        if not packet_number:
+            packet_numbers.remove(packet_numbers[0])
+        if not packet_numbers:
             break
 
     print("...Done")
