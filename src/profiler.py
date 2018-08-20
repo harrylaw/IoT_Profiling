@@ -9,8 +9,8 @@ ip, cap, cap_sum = filter_devices(unfiltered_cap, unfiltered_cap_sum)
 
 
 def u_d_rate(ip):
-    uploadesize = 0
-    downloadesize = 0
+    upload_size = 0
+    download_size = 0
     for pkt in cap:
         try:
             if ipaddress.ip_address(pkt.ip.src).is_multicast or ipaddress.ip_address(pkt.ip.dst).is_multicast:
@@ -19,15 +19,15 @@ def u_d_rate(ip):
                 continue
 
             elif pkt.ip.src == ip:
-                uploadesize = uploadesize + int(pkt.length)
+                upload_size = upload_size + int(pkt.length)
             elif pkt.ip.dst == ip:
-                downloadesize = downloadesize + int(pkt.length)
+                download_size = download_size + int(pkt.length)
         except AttributeError:
                 pass
 
-    u_rate = uploadesize/(uploadesize+downloadesize)
-    d_rate = downloadesize/(downloadesize+uploadesize)
-    return u_rate-d_rate
+    u_rate = upload_size / (upload_size + download_size)
+    d_rate = download_size / (download_size + upload_size)
+    return u_rate - d_rate
 
 
 def l_c_rate():
@@ -46,8 +46,8 @@ def l_c_rate():
         except AttributeError:
                 pass
     total = local + multicast + cloud
-    l_rate = local/total
-    c_rate = cloud/total
+    l_rate = local / total
+    c_rate = cloud / total
     return l_rate, c_rate
 
 
@@ -59,8 +59,8 @@ def rate():
         size = size + float(pkt.length)
     # for i in range(0, len(time)):
     # 	print("1 Time" + "[" + str(i) + "]" + " = " + str(time[i]))
-    total_time = float(time[-1])-float(time[0])
-    rate = size/total_time
+    total_time = float(time[-1]) - float(time[0])
+    rate = size / total_time
     return rate
 
 
