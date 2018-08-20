@@ -122,14 +122,6 @@ def filter_packets(device_number, cap, cap_sum):
     return filtered_cap, filtered_cap_sum
 
 
-def filter_devices(cap, cap_sum):
-    create_list(cap)
-    print_list()
-    device_number = ask_for_device()
-    filtered_cap, filtered_cap_sum = filter_packets(device_number, cap, cap_sum)
-    return IPs[device_number], filtered_cap, filtered_cap_sum
-
-
 def get_ip(device_number):
     return IPs[device_number]
 
