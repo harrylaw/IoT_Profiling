@@ -47,14 +47,12 @@ def L_C_Rate():
 	return lr,cr
 
 def Rate():
-	i = 0
 	time = []
 	size = 0
 	for pkt in cap_sum:
 		time.append(pkt.time)
 		size = size + float(pkt.length)
-		i = i+1
-	totaltime = float(time[i-1])-float(time[0])
+	totaltime = float(time[-1])-float(time[0])
 	rate = size/totaltime
 	return rate 
 
