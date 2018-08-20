@@ -81,7 +81,6 @@ def create_list(cap):
     for i in range(0, len(IPs)):
         if IPs[i] == "":
             rows_to_remove.append(i)
-
     for row_number in rows_to_remove:
         MACs.remove(MACs[row_number])
         IPs.remove(IPs[row_number])
