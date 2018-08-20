@@ -223,6 +223,7 @@ if __name__ == "__main__":
     if is_shy(rate()):
         print("Shy")
 
+    print()
     print("Voice Assistant Score: {:.2f}%".format(check_premium() * 100))
     print("Bulb Score: {:.2f}%".format(check_bulb() * 100))
     print("Strip Score {:.2f}%".format(check_strip() * 100))

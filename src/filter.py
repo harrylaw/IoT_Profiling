@@ -104,6 +104,7 @@ def filter_packets(device_number, cap, cap_sum):
             break
 
     print("...Done")
+    print()
     print("Now profiling: " + Manufacturers[device_number])
     return filtered_cap, filtered_cap_sum
 
