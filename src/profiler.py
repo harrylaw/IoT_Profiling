@@ -3,7 +3,6 @@ import sys
 import ipaddress
 from filter import create_list, print_list, ask_for_device, filter_packets, get_ip, get_mac
 
-
 def calculate_u_d_rate(ip, cap):  # use cap
     upload_size = 0
     download_size = 0
@@ -190,6 +189,15 @@ def check_other(l_c_rate,protocol_list,rate,u_d_rate):
     if check_premium(l_c_rate,protocol_list,rate) < 0.7 and check_bulb(l_c_rate,rate,protocol_list) < 0.7 and check_strip(protocol_list,l_c_rate) < 0.7 and check_uploader() < 0.7:
         return 1
 
+def check_router(n,cap):
+    mac = get_mac(n)
+    for pkt in cap:
+        try:
+            if (pkt.eth.src == mac and ipaddress.ip_address(pkt.ip.src).is_global) or (pkt.eth.dst == mac and ipaddress.ip_address(pkt.ip.dst).is_global):
+                return 1
+        except AttributeError as e:
+            pass
+
 
 if __name__ == "__main__":
     unfiltered_cap = pyshark.FileCapture(sys.argv[1])
@@ -233,11 +241,13 @@ if __name__ == "__main__":
             print("Talkative")
         if is_shy(rate):
             print("Shy")
-
-        print()
-        print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
-        print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
-        print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
-        print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
-        if check_other(l_c_rate,protocol_list,rate,u_d_rate):
-            print("Other devices")
+        print("")
+        if check_router(device_number,cap):
+            print("It's a router")
+        else:    
+            print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
+            print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
+            print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
+            print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
+            if check_other(l_c_rate,protocol_list,rate,u_d_rate):
+                print("Other devices")
