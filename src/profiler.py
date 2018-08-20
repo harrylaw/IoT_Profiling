@@ -166,67 +166,72 @@ def is_downloader(dif):
         return 0
 
 
-def check_premium():
-    p_rate = 0.6 * is_more_global(l_c_rate()) + 0.3 * is_encrypted(protocol_list()) + 0.1 * is_talkative(rate())
+def check_premium(l_c_rate,protocol_list,rate):
+    p_rate = 0.6 * is_more_global(l_c_rate) + 0.3 * is_encrypted(protocol_list) + 0.1 * is_talkative(rate)
     return p_rate
 
 
-def check_bulb():
-    b_rate = 0.7 * is_mainly_global(l_c_rate()) + 0.2 * is_shy(rate()) + 0.1 * is_iot(protocol_list())
+def check_bulb(l_c_rate,rate,protocol_list):
+    b_rate = 0.7 * is_mainly_global(l_c_rate) + 0.2 * is_shy(rate) + 0.1 * is_iot(protocol_list)
     return b_rate
 
 
-def check_strip():
-    s_rate1 = 0.8 * is_lightweight(protocol_list()) + 0.1 * is_unreliable(protocol_list()) + 0.1 * is_iot(protocol_list())
-    s_rate2 = 0.8 * is_mainly_local(l_c_rate()) + 0.2 * is_iot(protocol_list())
+def check_strip(protocol_list,l_c_rate):
+    s_rate1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
+    s_rate2 = 0.8 * is_mainly_local(l_c_rate) + 0.2 * is_iot(protocol_list)
     if s_rate1 > s_rate2:
         return s_rate1
     else:
         return s_rate2
 
 
-def check_uploader():
-    u_rate = 0.8 * is_uploader(u_d_rate(ip)) + 0.1 * is_talkative(rate()) + 0.1 * is_iot(protocol_list())
+def check_uploader(u_d_rate,rate,protocol_list):
+    u_rate = 0.8 * is_uploader(u_d_rate) + 0.1 * is_talkative(rate) + 0.1 * is_iot(protocol_list)
     return u_rate
 
 
-def check_other():
-    if check_premium() < 0.7 and check_bulb() < 0.7 and check_strip() < 0.7 and check_uploader() < 0.7:
+def check_other(l_c_rate,protocol_list,rate,u_d_rate):
+    if check_premium(l_c_rate,protocol_list,rate) < 0.7 and check_bulb(l_c_rate,rate,protocol_list) < 0.7 and check_strip(protocol_list,l_c_rate) < 0.7 and check_uploader() < 0.7:
         return 1
 
 
 if __name__ == "__main__":
-    if is_uploader(u_d_rate(ip)):
+    u_d_rate = u_d_rate(ip)
+    protocol_list = protocol_list()
+    l_c_rate = l_c_rate()
+    rate = rate()
+
+    if is_uploader(u_d_rate):
         print("Uploader")
-    if is_downloader(u_d_rate(ip)):
+    if is_downloader(u_d_rate):
         print("Downloader")
-    if is_iot(protocol_list()):
+    if is_iot(protocol_list):
         print("IoT")
-    if is_unreliable(protocol_list()):
+    if is_unreliable(protocol_list):
         print("Have unreliable conversation")
-    if is_lightweight(protocol_list()):
+    if is_lightweight(protocol_list):
         print("Lightweight")
-    if is_upnp(protocol_list()):
+    if is_upnp(protocol_list):
         print("Universal plug and play")
-    if is_encrypted(protocol_list()):
+    if is_encrypted(protocol_list):
         print("Encrypted")
-    if is_timesync(protocol_list()):
+    if is_timesync(protocol_list):
         print("Time syncing")
-    if is_mainly_local(l_c_rate()):
+    if is_mainly_local(l_c_rate):
         print("Talks mainly locally")
-    if is_more_global(l_c_rate()):
+    if is_more_global(l_c_rate):
         print("Talks globally and locally")
-    if is_mainly_global(l_c_rate()):
+    if is_mainly_global(l_c_rate):
         print("Talks mainly globally")
-    if is_talkative(rate()):
+    if is_talkative(rate):
         print("Talkative")
-    if is_shy(rate()):
+    if is_shy(rate):
         print("Shy")
 
     print()
-    print("Voice Assistant Score: {:.2f}%".format(check_premium() * 100))
-    print("Bulb Score: {:.2f}%".format(check_bulb() * 100))
-    print("Strip Score {:.2f}%".format(check_strip() * 100))
-    print("Sensor Score: {:.2f}%".format(check_uploader() * 100))
-    if check_other():
+    print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
+    print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
+    print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
+    print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
+    if check_other(l_c_rate,protocol_list,rate,u_d_rate):
         print("Other devices")
