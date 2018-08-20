@@ -1,14 +1,10 @@
 import pyshark
 import sys
 import ipaddress
-from filter import filter_devices
-
-unfiltered_cap = pyshark.FileCapture(sys.argv[1])
-unfiltered_cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
-ip, cap, cap_sum = filter_devices(unfiltered_cap, unfiltered_cap_sum)
+from filter import create_list, print_list, ask_for_device, filter_packets, get_ip, get_mac
 
 
-def u_d_rate(ip):
+def calculate_u_d_rate(ip, cap):  # use cap
     upload_size = 0
     download_size = 0
     for pkt in cap:
@@ -30,7 +26,7 @@ def u_d_rate(ip):
     return u_rate - d_rate
 
 
-def l_c_rate():
+def calculate_l_c_rate(cap):  # use cap
     local = 0
     multicast = 0
     cloud = 0
@@ -51,7 +47,7 @@ def l_c_rate():
     return l_rate, c_rate
 
 
-def rate():
+def calculate_rate(cap_sum):  # use cap_sum
     time = []
     size = 0
     for pkt in cap_sum:
@@ -64,7 +60,7 @@ def rate():
     return rate
 
 
-def protocol_list():
+def generate_protocol_list(cap_sum):  # use cap_sum
     protocols = []
     for pkt in cap_sum:
         for i in range(0, len(protocols)):
@@ -196,42 +192,52 @@ def check_other(l_c_rate,protocol_list,rate,u_d_rate):
 
 
 if __name__ == "__main__":
-    u_d_rate = u_d_rate(ip)
-    protocol_list = protocol_list()
-    l_c_rate = l_c_rate()
-    rate = rate()
+    unfiltered_cap = pyshark.FileCapture(sys.argv[1])
+    unfiltered_cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
+    create_list(unfiltered_cap)
 
-    if is_uploader(u_d_rate):
-        print("Uploader")
-    if is_downloader(u_d_rate):
-        print("Downloader")
-    if is_iot(protocol_list):
-        print("IoT")
-    if is_unreliable(protocol_list):
-        print("Have unreliable conversation")
-    if is_lightweight(protocol_list):
-        print("Lightweight")
-    if is_upnp(protocol_list):
-        print("Universal plug and play")
-    if is_encrypted(protocol_list):
-        print("Encrypted")
-    if is_timesync(protocol_list):
-        print("Time syncing")
-    if is_mainly_local(l_c_rate):
-        print("Talks mainly locally")
-    if is_more_global(l_c_rate):
-        print("Talks globally and locally")
-    if is_mainly_global(l_c_rate):
-        print("Talks mainly globally")
-    if is_talkative(rate):
-        print("Talkative")
-    if is_shy(rate):
-        print("Shy")
+    while True:
+        print_list()
+        device_number = ask_for_device()
+        cap, cap_sum = filter_packets(device_number, unfiltered_cap, unfiltered_cap_sum)
+        ip = get_ip(device_number)
 
-    print()
-    print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
-    print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
-    print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
-    print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
-    if check_other(l_c_rate,protocol_list,rate,u_d_rate):
-        print("Other devices")
+        u_d_rate = calculate_u_d_rate(ip, cap)
+        protocol_list = generate_protocol_list(cap_sum)
+        l_c_rate = calculate_l_c_rate(cap)
+        rate = calculate_rate(cap_sum)
+
+        if is_uploader(u_d_rate):
+            print("Uploader")
+        if is_downloader(u_d_rate):
+            print("Downloader")
+        if is_iot(protocol_list):
+            print("IoT")
+        if is_unreliable(protocol_list):
+            print("Have unreliable conversation")
+        if is_lightweight(protocol_list):
+            print("Lightweight")
+        if is_upnp(protocol_list):
+            print("Universal plug and play")
+        if is_encrypted(protocol_list):
+            print("Encrypted")
+        if is_timesync(protocol_list):
+            print("Time syncing")
+        if is_mainly_local(l_c_rate):
+            print("Talks mainly locally")
+        if is_more_global(l_c_rate):
+            print("Talks globally and locally")
+        if is_mainly_global(l_c_rate):
+            print("Talks mainly globally")
+        if is_talkative(rate):
+            print("Talkative")
+        if is_shy(rate):
+            print("Shy")
+
+        print()
+        print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
+        print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
+        print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
+        print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
+        if check_other(l_c_rate,protocol_list,rate,u_d_rate):
+            print("Other devices")

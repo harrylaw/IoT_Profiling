@@ -130,6 +130,14 @@ def filter_devices(cap, cap_sum):
     return IPs[device_number], filtered_cap, filtered_cap_sum
 
 
+def get_ip(device_number):
+    return IPs[device_number]
+
+
+def get_mac(device_number):
+    return MACs[device_number]
+
+
 if __name__ == "__main__":
     import pyshark
     import sys
