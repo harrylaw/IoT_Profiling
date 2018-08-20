@@ -8,7 +8,7 @@ Manufacturers = []
 
 def print_list():
     print()
-    print('{:^60s}'.format("Device List"))
+    print('{:^62s}'.format("Device List"))
     print('--------------------------------------------------------------')
     print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format("No.", "MAC", "IP", "Manufacturer"))
     print('--------------------------------------------------------------')
@@ -31,8 +31,10 @@ def ask_for_device():
 
 
 def create_list(cap):
+    rows_to_remove = []
     print("Please wait while we generate the device list.")
     mac_parser = manuf.MacParser(update=True)
+
     for pkt in cap:
             for i in range(0, len(MACs)):
                 if MACs[i] == pkt.eth.src:
@@ -75,6 +77,15 @@ def create_list(cap):
                             raise AttributeError
                     except AttributeError:
                         IPs.append("")
+
+    for i in range(0, len(IPs)):
+        if IPs[i] == "":
+            rows_to_remove.append(i)
+
+    for row_number in rows_to_remove:
+        MACs.remove(MACs[row_number])
+        IPs.remove(IPs[row_number])
+        Manufacturers.remove(Manufacturers[row_number])
 
 
 def filter_packets(device_number, cap, cap_sum):
