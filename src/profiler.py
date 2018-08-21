@@ -203,8 +203,7 @@ def check_other(l_c_rate,protocol_list, rate, u_d_rate):
 
 
 def check_router(device_number, cap):
-    if has_public_ip(device_number, cap):
-        return 1
+    return has_public_ip(device_number, cap)
 
 
 def continue_or_exit():
