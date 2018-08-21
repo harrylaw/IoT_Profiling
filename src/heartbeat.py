@@ -4,10 +4,10 @@ from filter import create_list, print_list, ask_for_device, filter_packets
 
 
 def calculate_heartbeat(cap_sum):  # use cap_sum
-    time_difference = []
+    time_differences = []
     for i in range(1, len(cap_sum)):
-        time_difference.append(float(cap_sum[i].time) - float(cap_sum[i-1].time))
-    heartbeat = sum(time_difference) / (len(cap_sum) - 1)
+        time_differences.append(float(cap_sum[i].time) - float(cap_sum[i-1].time))
+    heartbeat = sum(time_differences) / (len(cap_sum) - 1)
     return heartbeat
 
 
