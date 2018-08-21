@@ -3,6 +3,7 @@ import sys
 import ipaddress
 from filter import create_list, print_list, ask_for_device, filter_packets, get_ip, get_mac
 
+
 def calculate_u_d_rate(ip, cap):  # use cap
     upload_size = 0
     download_size = 0
@@ -189,6 +190,7 @@ def check_other(l_c_rate,protocol_list,rate,u_d_rate):
     if check_premium(l_c_rate,protocol_list,rate) < 0.7 and check_bulb(l_c_rate,rate,protocol_list) < 0.7 and check_strip(protocol_list,l_c_rate) < 0.7 and check_uploader() < 0.7:
         return 1
 
+
 def check_router(n,cap):
     mac = get_mac(n)
     for pkt in cap:
@@ -197,6 +199,22 @@ def check_router(n,cap):
                 return 1
         except AttributeError as e:
             pass
+
+
+def continue_or_exit():
+    while True:
+        try:
+            print()
+            choice = input("Do you want to profile another device in the same .pcap file? (y/n) ")
+            if choice == 'y':
+                return
+            elif choice == 'n':
+                print("Goodbye!")
+                exit()
+            else:
+                raise ValueError
+        except ValueError:
+            print("Invalid input! Please try again.")
 
 
 if __name__ == "__main__":
@@ -241,7 +259,8 @@ if __name__ == "__main__":
             print("Talkative")
         if is_shy(rate):
             print("Shy")
-        print("")
+
+        print()
         if check_router(device_number,cap):
             print("It's a router")
         else:    
@@ -251,3 +270,5 @@ if __name__ == "__main__":
             print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
             if check_other(l_c_rate,protocol_list,rate,u_d_rate):
                 print("Other devices")
+
+        continue_or_exit()
