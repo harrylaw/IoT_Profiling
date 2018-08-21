@@ -241,31 +241,31 @@ if __name__ == "__main__":
         if has_public_ip(device_number, cap):
             print("Has public IP")
         if is_uploader(u_d_rate):
-            print("Uploader")
+            print("Uploader:"+" Difference between upload and download rate: {:.2f}".format(u_d_rate))
         if is_downloader(u_d_rate):
-            print("Downloader")
+            print("Downloader:"+" Difference between upload and download rate: {:.2f}".format(u_d_rate))
         if is_iot(protocol_list):
-            print("IoT")
+            print("IoT"+"(Using MDNS Protocol)")
         if is_unreliable(protocol_list):
-            print("Has unreliable conversation")
+            print("Has unreliable conversation"+"(Using UDP Protocol)")
         if is_lightweight(protocol_list):
-            print("Lightweight")
+            print("Lightweight"+"(Using MQTT Protocol)")
         if is_upnp(protocol_list):
-            print("Universal Plug and Play")
+            print("Universal Plug and Play"+"(Using SSDP Protocol)")
         if is_encrypted(protocol_list):
-            print("Encrypted")
+            print("Encrypted"+"(Using TLSv1 or TLSv1.2 Protocol)")
         if is_timesync(protocol_list):
-            print("Time syncing")
+            print("Time syncing"+"(Using NTP Protocol)")
         if is_mainly_local(l_c_rate):
-            print("Talks mainly locally")
+            print("Talks mainly locally:"+" Local Packets/All Packets: {:.2f}".format(l_c_rate[0]))
         if is_more_global(l_c_rate):
-            print("Talks globally and locally")
+            print("Talks globally and locally:"+" Local Packets/All Packets: {:.2f}".format(l_c_rate[0]))
         if is_mainly_global(l_c_rate):
-            print("Talks mainly globally")
+            print("Talks mainly globally:"+" Global Packets/All Packets: {:.2f}".format(l_c_rate[1]))
         if is_talkative(rate):
-            print("Talkative")
+            print("Talkative:"+" Packets Size/Total Time: {:.2f}".format(rate))
         if is_shy(rate):
-            print("Shy")
+            print("Shy:"+" Cumulative Packets Size/Total Time: {:.2f}".format(rate))
 
         print()
         print("Router Score: {:.2f}%".format(check_router(device_number, cap) * 100))
