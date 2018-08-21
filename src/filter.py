@@ -82,7 +82,7 @@ def create_list(cap):
                         ips_unfiltered.append("")
 
     for i in range(0, len(ips_unfiltered)):
-        if str(ips_unfiltered[i]) != "":
+        if ips_unfiltered[i] != "":
             rows_to_keep.append(i)
     for row_number in rows_to_keep:
         MACs.append(macs_unfiltered[row_number])
