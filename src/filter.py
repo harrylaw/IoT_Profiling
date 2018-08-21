@@ -31,60 +31,63 @@ def ask_for_device():
 
 
 def create_list(cap):
-    rows_to_remove = []
+    macs_unfiltered = []
+    ips_unfiltered = []
+    manufacturers_unfiltered = []
+    rows_to_keep = []
     print("Please wait while we generate the device list.")
     mac_parser = manuf.MacParser(update=True)
 
     for pkt in cap:
-            for i in range(0, len(MACs)):
-                if MACs[i] == pkt.eth.src:
+            for i in range(0, len(macs_unfiltered)):
+                if macs_unfiltered[i] == pkt.eth.src:
                     try:
-                        if IPs[i] == "" and pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
-                            IPs[i] = pkt.ip.src
+                        if ips_unfiltered[i] == "" and pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
+                            ips_unfiltered[i] = pkt.ip.src
                     except AttributeError:
                         pass
                     break
             else:
                 manufacturer = mac_parser.get_manuf(pkt.eth.src)
                 if str(manufacturer) != "None":
-                    MACs.append(pkt.eth.src)
-                    Manufacturers.append(manufacturer)
+                    macs_unfiltered.append(pkt.eth.src)
+                    manufacturers_unfiltered.append(manufacturer)
                     try:
                         if pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
-                            IPs.append(pkt.ip.src)
+                            ips_unfiltered.append(pkt.ip.src)
                         else:
                             raise AttributeError
                     except AttributeError:
-                        IPs.append("")
+                        ips_unfiltered.append("")
 
-            for i in range(0, len(MACs)):
-                if MACs[i] == pkt.eth.dst:
+            for i in range(0, len(macs_unfiltered)):
+                if macs_unfiltered[i] == pkt.eth.dst:
                     try:
-                        if IPs[i] == "" and pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
-                            IPs[i] = pkt.ip.dst
+                        if ips_unfiltered[i] == "" and pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
+                            ips_unfiltered[i] = pkt.ip.dst
                     except AttributeError:
                         pass
                     break
             else:
                 manufacturer = mac_parser.get_manuf(pkt.eth.dst)
                 if str(manufacturer) != "None":
-                    MACs.append(pkt.eth.dst)
-                    Manufacturers.append(manufacturer)
+                    macs_unfiltered.append(pkt.eth.dst)
+                    manufacturers_unfiltered.append(manufacturer)
                     try:
                         if pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
-                            IPs.append(pkt.ip.dst)
+                            ips_unfiltered.append(pkt.ip.dst)
                         else:
                             raise AttributeError
                     except AttributeError:
-                        IPs.append("")
+                        ips_unfiltered.append("")
 
-    for i in range(0, len(IPs)):
-        if IPs[i] == "":
-            rows_to_remove.append(i)
-    for row_number in rows_to_remove:
-        MACs.remove(MACs[row_number])
-        IPs.remove(IPs[row_number])
-        Manufacturers.remove(Manufacturers[row_number])
+    for i in range(0, len(ips_unfiltered)):
+        if str(ips_unfiltered[i]) != "":
+            rows_to_keep.append(i)
+    for row_number in rows_to_keep:
+        MACs.append(macs_unfiltered[row_number])
+        IPs.append(ips_unfiltered[row_number])
+        Manufacturers.append(manufacturers_unfiltered[row_number])
 
 
 def filter_packets(device_number, cap, cap_sum):
