@@ -53,8 +53,6 @@ def calculate_rate(cap_sum):  # use cap_sum
     for pkt in cap_sum:
         time.append(pkt.time)
         size = size + float(pkt.length)
-    # for i in range(0, len(time)):
-    # 	print("1 Time" + "[" + str(i) + "]" + " = " + str(time[i]))
     total_time = float(time[-1]) - float(time[0])
     rate = size / total_time
     return rate
