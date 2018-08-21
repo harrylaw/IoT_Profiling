@@ -224,8 +224,8 @@ def continue_or_exit():
 if __name__ == "__main__":
     unfiltered_cap = pyshark.FileCapture(sys.argv[1])
     unfiltered_cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
-    create_list(unfiltered_cap)
 
+    create_list(unfiltered_cap)
     while True:
         print_list()
         device_number = ask_for_device()
