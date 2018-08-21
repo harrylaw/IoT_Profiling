@@ -69,8 +69,7 @@ def generate_protocol_list(cap_sum):  # use cap_sum
     return protocols
 
 
-def has_public_ip(device_number, cap):
-    mac = get_mac(device_number)
+def has_public_ip(mac, cap):
     for pkt in cap:
         try:
             if (pkt.eth.src == mac and ipaddress.ip_address(pkt.ip.src).is_global) or (
@@ -202,8 +201,8 @@ def check_other(l_c_rate,protocol_list, rate, u_d_rate):
         return 1
 
 
-def check_router(device_number, cap):
-    return has_public_ip(device_number, cap)
+def check_router(mac, cap):
+    return has_public_ip(mac, cap)
 
 
 def continue_or_exit():
@@ -232,13 +231,14 @@ if __name__ == "__main__":
         device_number = ask_for_device()
         cap, cap_sum = filter_packets(device_number, unfiltered_cap, unfiltered_cap_sum)
         ip = get_ip(device_number)
+        mac = get_mac(device_number)
 
         u_d_rate = calculate_u_d_rate(ip, cap)
         protocol_list = generate_protocol_list(cap_sum)
         l_c_rate = calculate_l_c_rate(cap)
         rate = calculate_rate(cap_sum)
 
-        if has_public_ip(device_number, cap):
+        if has_public_ip(mac, cap):
             print("Has public IP")
         if is_uploader(u_d_rate):
             print("Uploader:"+" Difference between upload and download rate: {:.2f}".format(u_d_rate))
@@ -268,7 +268,7 @@ if __name__ == "__main__":
             print("Shy:"+" Cumulative Packets Size/Total Time: {:.2f}".format(rate))
 
         print()
-        print("Router Score: {:.2f}%".format(check_router(device_number, cap) * 100))
+        print("Router Score: {:.2f}%".format(check_router(mac, cap) * 100))
         print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
         print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
         print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
