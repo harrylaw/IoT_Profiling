@@ -7,7 +7,9 @@ Automated tools to profile and discover IoT devices
 1. Wireshark:
 
     Must have already installed Wireshark.
-1. pyshark:
+2. pyshark:
 
     `pip3 install pyshark`
-    
+3. manuf:
+
+    `pip3 install manuf`
