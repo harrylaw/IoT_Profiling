@@ -69,6 +69,19 @@ def generate_protocol_list(cap_sum):  # use cap_sum
     return protocols
 
 
+def has_public_ip(device_number, cap):
+    mac = get_mac(device_number)
+    for pkt in cap:
+        try:
+            if (pkt.eth.src == mac and ipaddress.ip_address(pkt.ip.src).is_global) or (
+                    pkt.eth.dst == mac and ipaddress.ip_address(pkt.ip.dst).is_global):
+                return 1
+        except AttributeError as e:
+            pass
+    else:
+        return 0
+
+
 def is_encrypted(protocols):
     for protocol in protocols:
         if protocol == 'TLSv1.2' or protocol == 'TLSv1':
@@ -160,17 +173,17 @@ def is_downloader(dif):
         return 0
 
 
-def check_premium(l_c_rate,protocol_list,rate):
+def check_premium(l_c_rate, protocol_list, rate):
     p_rate = 0.6 * is_more_global(l_c_rate) + 0.3 * is_encrypted(protocol_list) + 0.1 * is_talkative(rate)
     return p_rate
 
 
-def check_bulb(l_c_rate,rate,protocol_list):
+def check_bulb(l_c_rate, rate, protocol_list):
     b_rate = 0.7 * is_mainly_global(l_c_rate) + 0.2 * is_shy(rate) + 0.1 * is_iot(protocol_list)
     return b_rate
 
 
-def check_strip(protocol_list,l_c_rate):
+def check_strip(protocol_list, l_c_rate):
     s_rate1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
     s_rate2 = 0.8 * is_mainly_local(l_c_rate) + 0.2 * is_iot(protocol_list)
     if s_rate1 > s_rate2:
@@ -179,24 +192,19 @@ def check_strip(protocol_list,l_c_rate):
         return s_rate2
 
 
-def check_uploader(u_d_rate,rate,protocol_list):
+def check_uploader(u_d_rate,rate, protocol_list):
     u_rate = 0.8 * is_uploader(u_d_rate) + 0.1 * is_talkative(rate) + 0.1 * is_iot(protocol_list)
     return u_rate
 
 
-def check_other(l_c_rate,protocol_list,rate,u_d_rate):
+def check_other(l_c_rate,protocol_list, rate, u_d_rate):
     if check_premium(l_c_rate,protocol_list,rate) < 0.7 and check_bulb(l_c_rate,rate,protocol_list) < 0.7 and check_strip(protocol_list,l_c_rate) < 0.7 and check_uploader() < 0.7:
         return 1
 
 
-def check_router(n,cap):
-    mac = get_mac(n)
-    for pkt in cap:
-        try:
-            if (pkt.eth.src == mac and ipaddress.ip_address(pkt.ip.src).is_global) or (pkt.eth.dst == mac and ipaddress.ip_address(pkt.ip.dst).is_global):
-                return 1
-        except AttributeError as e:
-            pass
+def check_router(device_number, cap):
+    if has_public_ip(device_number, cap):
+        return 1
 
 
 def continue_or_exit():
@@ -231,6 +239,8 @@ if __name__ == "__main__":
         l_c_rate = calculate_l_c_rate(cap)
         rate = calculate_rate(cap_sum)
 
+        if has_public_ip(device_number, cap):
+            print("Has public IP")
         if is_uploader(u_d_rate):
             print("Uploader")
         if is_downloader(u_d_rate):
@@ -238,11 +248,11 @@ if __name__ == "__main__":
         if is_iot(protocol_list):
             print("IoT")
         if is_unreliable(protocol_list):
-            print("Have unreliable conversation")
+            print("Has unreliable conversation")
         if is_lightweight(protocol_list):
             print("Lightweight")
         if is_upnp(protocol_list):
-            print("Universal plug and play")
+            print("Universal Plug and Play")
         if is_encrypted(protocol_list):
             print("Encrypted")
         if is_timesync(protocol_list):
@@ -259,14 +269,12 @@ if __name__ == "__main__":
             print("Shy")
 
         print()
-        if check_router(device_number,cap):
-            print("It's a router")
-        else:    
-            print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
-            print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
-            print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
-            print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
-            if check_other(l_c_rate,protocol_list,rate,u_d_rate):
-                print("Other devices")
+        print("Router Score: {:.2f}%".format(check_router(device_number, cap) * 100))
+        print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
+        print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
+        print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
+        print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
+        if check_other(l_c_rate,protocol_list,rate,u_d_rate):
+            print("Other devices")
 
         continue_or_exit()
