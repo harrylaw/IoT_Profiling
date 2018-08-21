@@ -160,26 +160,26 @@ def is_shy(rate):
 
 
 def is_uploader(dif):
-    if dif > 0 and abs(dif) > 0.3:
+    if dif > 0 and abs(dif) > 0.45:
         return 1
     else:
         return 0
 
 
 def is_downloader(dif):
-    if dif < 0 and abs(dif) > 0.3:
+    if dif < 0 and abs(dif) > 0.45:
         return 1
     else:
         return 0
 
 
 def check_premium(l_c_rate, protocol_list, rate):
-    p_rate = 0.6 * is_more_global(l_c_rate) + 0.3 * is_encrypted(protocol_list) + 0.1 * is_talkative(rate)
+    p_rate = 0.6 * is_more_global(l_c_rate) + 0.1 * is_encrypted(protocol_list) + 0.3 * is_talkative(rate)
     return p_rate
 
 
 def check_bulb(l_c_rate, rate, protocol_list):
-    b_rate = 0.7 * is_mainly_global(l_c_rate) + 0.2 * is_shy(rate) + 0.1 * is_iot(protocol_list)
+    b_rate = 0.7 * is_mainly_global(l_c_rate)  + 0.3 * is_iot(protocol_list)
     return b_rate
 
 
@@ -193,7 +193,7 @@ def check_strip(protocol_list, l_c_rate):
 
 
 def check_uploader(u_d_rate,rate, protocol_list):
-    u_rate = 0.8 * is_uploader(u_d_rate) + 0.1 * is_talkative(rate) + 0.1 * is_iot(protocol_list)
+    u_rate = 0.6 * is_uploader(u_d_rate) + 0.4 * is_talkative(rate) 
     return u_rate
 
 
@@ -272,7 +272,7 @@ if __name__ == "__main__":
         print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
         print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
         print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
-        print("Sensor Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
+        print("Camera Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
         if check_other(l_c_rate,protocol_list,rate,u_d_rate):
             print("Other devices")
 
