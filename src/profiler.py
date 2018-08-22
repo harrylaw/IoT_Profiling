@@ -4,6 +4,12 @@ import ipaddress
 from filter import Filter
 
 
+class Result:
+    def __init__(self, tag, comment):
+        self.tag = tag
+        self.comment = comment
+
+
 def calculate_u_d_rate(ip, cap):  # use cap
     upload_size = 0
     download_size = 0
@@ -221,10 +227,68 @@ def continue_or_exit():
             print("Invalid input! Please try again.")
 
 
+def add_tags():
+    if has_public_ip(mac, cap):
+        result = Result("Has public IP", "Has public IP associated with MAC")
+        results.append(result)
+    if is_uploader(u_d_rate):
+        result = Result("Uploader", "Upload Rate - Download Rate = {:.2f}".format(u_d_rate))
+        results.append(result)
+    if is_downloader(u_d_rate):
+        result = Result("Downloader", "Difference between upload and download rate: {:.2f}".format(u_d_rate))
+        results.append(result)
+    if is_iot(protocol_list):
+        result = Result("IoT", "Using MDNS Protocol")
+        results.append(result)
+    if is_unreliable(protocol_list):
+        result = Result("Has unreliable traffic", "Using UDP Protocol")
+        results.append(result)
+    if is_lightweight(protocol_list):
+        result = Result("Lightweight", "Using MQTT Protocol")
+        results.append(result)
+    if is_upnp(protocol_list):
+        result = Result("Universal Plug and Play", "Using SSDP Protocol")
+        results.append(result)
+    if is_encrypted(protocol_list):
+        result = Result("Encrypted", "Using TLSv1 or TLSv1.2 Protocol")
+        results.append(result)
+    if is_timesync(protocol_list):
+        result = Result("Time synchronizer", "Using NTP Protocol")
+        results.append(result)
+    if is_mainly_local(l_c_rate):
+        result = Result("Talks mainly locally", "Local Packets / All Packets = {:.2f}".format(l_c_rate[0]))
+        results.append(result)
+    if is_more_global(l_c_rate):
+        result = Result("Talks globally and locally", "Local Packets / All Packets = {:.2f}".format(l_c_rate[0]))
+        results.append(result)
+    if is_mainly_global(l_c_rate):
+        result = Result("Talks mainly globally", "Global Packets / All Packets = {:.2f}".format(l_c_rate[1]))
+        results.append(result)
+    if is_talkative(rate):
+        result = Result("Talkative", "Packets Size/Total Time: {:.2f}".format(rate))
+        results.append(result)
+    if is_shy(rate):
+        result = Result("Shy", "Cumulative Packets Size/Total Time: {:.2f}".format(rate))
+        results.append(result)
+
+
+def print_tags():
+    print()
+    print('{:^72s}'.format("Profiling Result"))
+    print('------------------------------------------------------------------------')
+    print('| {:^25s} | {:^40s} |'.format("Tag", "Comment"))
+    print('------------------------------------------------------------------------')
+    for result in results:
+        print('| {:^25s} | {:^40s} |'.format(result.tag, result.comment))
+        print('------------------------------------------------------------------------')
+    print()
+
+
 if __name__ == "__main__":
     unfiltered_cap = pyshark.FileCapture(sys.argv[1])
     unfiltered_cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
     pkt_filter = Filter(unfiltered_cap, unfiltered_cap_sum)
+    results = []
 
     pkt_filter.create_device_list()
     while True:
@@ -239,34 +303,8 @@ if __name__ == "__main__":
         l_c_rate = calculate_l_c_rate(cap)
         rate = calculate_rate(cap_sum)
 
-        if has_public_ip(mac, cap):
-            print("Has public IP")
-        if is_uploader(u_d_rate):
-            print("Uploader:"+" Difference between upload and download rate: {:.2f}".format(u_d_rate))
-        if is_downloader(u_d_rate):
-            print("Downloader:"+" Difference between upload and download rate: {:.2f}".format(u_d_rate))
-        if is_iot(protocol_list):
-            print("IoT"+"(Using MDNS Protocol)")
-        if is_unreliable(protocol_list):
-            print("Has unreliable conversation"+"(Using UDP Protocol)")
-        if is_lightweight(protocol_list):
-            print("Lightweight"+"(Using MQTT Protocol)")
-        if is_upnp(protocol_list):
-            print("Universal Plug and Play"+"(Using SSDP Protocol)")
-        if is_encrypted(protocol_list):
-            print("Encrypted"+"(Using TLSv1 or TLSv1.2 Protocol)")
-        if is_timesync(protocol_list):
-            print("Time syncing"+"(Using NTP Protocol)")
-        if is_mainly_local(l_c_rate):
-            print("Talks mainly locally:"+" Local Packets/All Packets: {:.2f}".format(l_c_rate[0]))
-        if is_more_global(l_c_rate):
-            print("Talks globally and locally:"+" Local Packets/All Packets: {:.2f}".format(l_c_rate[0]))
-        if is_mainly_global(l_c_rate):
-            print("Talks mainly globally:"+" Global Packets/All Packets: {:.2f}".format(l_c_rate[1]))
-        if is_talkative(rate):
-            print("Talkative:"+" Packets Size/Total Time: {:.2f}".format(rate))
-        if is_shy(rate):
-            print("Shy:"+" Cumulative Packets Size/Total Time: {:.2f}".format(rate))
+        add_tags()
+        print_tags()
 
         print()
         print("Router Score: {:.2f}%".format(check_router(mac, cap) * 100))
