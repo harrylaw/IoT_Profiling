@@ -6,7 +6,7 @@ IPs = []
 Manufacturers = []
 
 
-def print_list():
+def print_device_list():
     print()
     print('{:^62s}'.format("Device List"))
     print('--------------------------------------------------------------')
@@ -30,7 +30,7 @@ def ask_for_device():
             print("Invalid input! Please try again.")
 
 
-def create_list(cap):
+def create_device_list(cap):
     macs_unfiltered = []
     ips_unfiltered = []
     manufacturers_unfiltered = []
@@ -139,7 +139,6 @@ if __name__ == "__main__":
 
     cap = pyshark.FileCapture(sys.argv[1])  # should not use only_summaries
     cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
-    ip, filtered_cap, filtered_cap_sum = filter_devices(cap, cap_sum)
     # for pkt in filtered_cap:
     #     print("1 " + str(pkt.number))
     #

@@ -1,6 +1,6 @@
 import pyshark
 import sys
-from filter import create_list, print_list, ask_for_device, filter_packets
+from filter import create_device_list, print_device_list, ask_for_device, filter_packets
 
 
 def calculate_heartbeat(cap_sum):  # use cap_sum
@@ -14,8 +14,8 @@ def calculate_heartbeat(cap_sum):  # use cap_sum
 if __name__ == "__main__":
     unfiltered_cap = pyshark.FileCapture(sys.argv[1])
     unfiltered_cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
-    create_list(unfiltered_cap)
-    print_list()
+    create_device_list(unfiltered_cap)
+    print_device_list()
     device_number = ask_for_device()
     cap, cap_sum = filter_packets(device_number, unfiltered_cap, unfiltered_cap_sum)
     print("heartbeat = {:.4f}".format(calculate_heartbeat(cap_sum)))
