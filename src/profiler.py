@@ -1,7 +1,7 @@
 import pyshark
 import sys
 import ipaddress
-from filter import create_device_list, print_device_list, ask_for_device, filter_packets, get_ip, get_mac
+from filter import Filter
 
 
 def calculate_u_d_rate(ip, cap):  # use cap
@@ -224,14 +224,15 @@ def continue_or_exit():
 if __name__ == "__main__":
     unfiltered_cap = pyshark.FileCapture(sys.argv[1])
     unfiltered_cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
+    pkt_filter = Filter(unfiltered_cap, unfiltered_cap_sum)
 
-    create_device_list(unfiltered_cap)
+    pkt_filter.create_device_list()
     while True:
-        print_device_list()
-        device_number = ask_for_device()
-        cap, cap_sum = filter_packets(device_number, unfiltered_cap, unfiltered_cap_sum)
-        ip = get_ip(device_number)
-        mac = get_mac(device_number)
+        pkt_filter.print_device_list()
+        pkt_filter.ask_for_device()
+        cap, cap_sum = pkt_filter.filter_packets()
+        ip = pkt_filter.get_profile_device_ip()
+        mac = pkt_filter.get_profile_device_mac()
 
         u_d_rate = calculate_u_d_rate(ip, cap)
         protocol_list = generate_protocol_list(cap_sum)
