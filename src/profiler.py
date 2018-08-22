@@ -307,12 +307,12 @@ if __name__ == "__main__":
         print_tags()
 
         print()
-        print("Router Score: {:.2f}%".format(check_router(mac, cap) * 100))
-        print("Voice Assistant Score: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
-        print("Bulb Score: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
-        print("Strip Score {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
-        print("Camera Score: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
+        print("Router Possibility: {:.2f}%".format(check_router(mac, cap) * 100))
+        print("Voice Assistant Possibility: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
+        print("Bulb Possibility: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
+        print("Strip Possibility {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
+        print("Camera Possibility: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
         if check_other(l_c_rate,protocol_list,rate,u_d_rate):
-            print("Other devices")
+            print("Other devices Possibility")
 
         continue_or_exit()
