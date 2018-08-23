@@ -127,7 +127,6 @@ class Filter:
 
         print("...Done")
         print()
-        print("Now profiling: " + self.__profile_device.Manufacturer)
         return filtered_cap, filtered_cap_sum
 
     def get_profile_device_ip(self):
@@ -135,6 +134,9 @@ class Filter:
 
     def get_profile_device_mac(self):
         return self.__profile_device.MAC
+
+    def get_profile_device_manufacturer(self):
+        return self.__profile_device.Manufacturer
 
 
 if __name__ == "__main__":

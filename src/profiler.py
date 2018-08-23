@@ -10,6 +10,20 @@ class Result:
         self.comment = comment
 
 
+class Possibility:
+    def __init__(self, device_type, number):
+        self.device_type = device_type
+        self.number = number
+
+
+def calculate_heartbeat(cap_sum):  # use cap_sum
+    time_differences = []
+    for i in range(1, len(cap_sum)):
+        time_differences.append(float(cap_sum[i].time) - float(cap_sum[i-1].time))
+    heartbeat = sum(time_differences) / (len(cap_sum) - 1)
+    return heartbeat
+
+
 def calculate_u_d_rate(ip, cap):  # use cap
     upload_size = 0
     download_size = 0
@@ -67,8 +81,8 @@ def calculate_rate(cap_sum):  # use cap_sum
 def generate_protocol_list(cap_sum):  # use cap_sum
     protocols = []
     for pkt in cap_sum:
-        for i in range(0, len(protocols)):
-            if protocols[i] == pkt.protocol:
+        for protocol in protocols:
+            if protocol == pkt.protocol:
                 break
         else:
             protocols.append(pkt.protocol)
@@ -115,7 +129,7 @@ def is_upnp(protocols):
     return 0
 
 
-def is_timesync(protocols):
+def is_time_synchronizer(protocols):
     for protocol in protocols:
         if protocol == 'NTP':
             return 1
@@ -150,15 +164,22 @@ def is_mainly_global(list):
         return 0
 
 
-def is_talkative(rate):
-    if rate > 100:
+def is_talkative(rate, heartbeat):
+    if rate > 500 and heartbeat < 1:
         return 1
     else:
         return 0
 
 
-def is_shy(rate):
-    if rate < 100:
+def is_neither_talkative_nor_shy(rate, heartbeat):
+    if 90 <= rate <= 500 or 1 <= heartbeat <= 3:
+        return 1
+    else:
+        return 0
+
+
+def is_shy(rate, heartbeat):
+    if rate < 90 and heartbeat > 3:
         return 1
     else:
         return 0
@@ -178,13 +199,13 @@ def is_downloader(dif):
         return 0
 
 
-def check_premium(l_c_rate, protocol_list, rate):
-    p_rate = 0.6 * is_more_global(l_c_rate) + 0.1 * is_encrypted(protocol_list) + 0.3 * is_talkative(rate)
+def check_premium(l_c_rate, protocol_list, rate, heartbeat):
+    p_rate = 0.6 * is_more_global(l_c_rate) + 0.1 * is_encrypted(protocol_list) + 0.3 * is_talkative(rate, heartbeat)
     return p_rate
 
 
-def check_bulb(l_c_rate, rate, protocol_list):
-    b_rate = 0.7 * is_mainly_global(l_c_rate)  + 0.3 * is_iot(protocol_list)
+def check_bulb(l_c_rate, protocol_list):
+    b_rate = 0.7 * is_mainly_global(l_c_rate) + 0.3 * is_iot(protocol_list)
     return b_rate
 
 
@@ -197,14 +218,9 @@ def check_strip(protocol_list, l_c_rate):
         return s_rate2
 
 
-def check_uploader(u_d_rate,rate, protocol_list):
-    u_rate = 0.6 * is_uploader(u_d_rate) + 0.4 * is_talkative(rate) 
+def check_uploader(u_d_rate, rate, heartbeat):
+    u_rate = 0.6 * is_uploader(u_d_rate) + 0.4 * is_talkative(rate, heartbeat)
     return u_rate
-
-
-def check_other(l_c_rate,protocol_list, rate, u_d_rate):
-    if check_premium(l_c_rate,protocol_list,rate) < 0.7 and check_bulb(l_c_rate,rate,protocol_list) < 0.7 and check_strip(protocol_list,l_c_rate) < 0.7 and check_uploader() < 0.7:
-        return 1
 
 
 def check_router(mac, cap):
@@ -227,49 +243,39 @@ def continue_or_exit():
             print("Invalid input! Please try again.")
 
 
-def add_tags():
+def add_tags(manufacturer):
+    print("Now profiling: " + manufacturer, end='', flush=True)
     if has_public_ip(mac, cap):
-        result = Result("Has public IP", "Has public IP associated with MAC")
-        results.append(result)
+        results.append(Result("Has public IP", "Has public IP associated with MAC"))
     if is_uploader(u_d_rate):
-        result = Result("Uploader", "Upload Rate - Download Rate = {:.2f}".format(u_d_rate))
-        results.append(result)
+        results.append(Result("Uploader", "Upload Rate - Download Rate = {:.2f}%".format(u_d_rate * 100)))
     if is_downloader(u_d_rate):
-        result = Result("Downloader", "Difference between upload and download rate: {:.2f}".format(u_d_rate))
-        results.append(result)
+        results.append(Result("Downloader", "Upload Rate - Download Rate = {:.2f}%".format(u_d_rate * 100)))
     if is_iot(protocol_list):
-        result = Result("IoT", "Using MDNS Protocol")
-        results.append(result)
+        results.append(Result("IoT", "Using MDNS Protocol"))
     if is_unreliable(protocol_list):
-        result = Result("Has unreliable traffic", "Using UDP Protocol")
-        results.append(result)
+        results.append(Result("Has unreliable traffic", "Using UDP Protocol"))
     if is_lightweight(protocol_list):
-        result = Result("Lightweight", "Using MQTT Protocol")
-        results.append(result)
+        results.append(Result("Lightweight", "Using MQTT Protocol"))
     if is_upnp(protocol_list):
-        result = Result("Universal Plug and Play", "Using SSDP Protocol")
-        results.append(result)
+        results.append(Result("Universal Plug and Play", "Using SSDP Protocol"))
     if is_encrypted(protocol_list):
-        result = Result("Encrypted", "Using TLSv1 or TLSv1.2 Protocol")
-        results.append(result)
-    if is_timesync(protocol_list):
-        result = Result("Time synchronizer", "Using NTP Protocol")
-        results.append(result)
+        results.append(Result("Encrypted", "Using TLSv1 or TLSv1.2 Protocol"))
+    if is_time_synchronizer(protocol_list):
+        results.append(Result("Time synchronizer", "Using NTP Protocol"))
     if is_mainly_local(l_c_rate):
-        result = Result("Talks mainly locally", "Local Packets / All Packets = {:.2f}".format(l_c_rate[0]))
-        results.append(result)
+        results.append(Result("Talks mainly locally", "Local Packets / All Packets = {:.2f}%".format(l_c_rate[0] * 100)))
     if is_more_global(l_c_rate):
-        result = Result("Talks globally and locally", "Local Packets / All Packets = {:.2f}".format(l_c_rate[0]))
-        results.append(result)
+        results.append(Result("Talks globally and locally", "Local Packets / All Packets = {:.2f}%".format(l_c_rate[0] * 100)))
     if is_mainly_global(l_c_rate):
-        result = Result("Talks mainly globally", "Global Packets / All Packets = {:.2f}".format(l_c_rate[1]))
-        results.append(result)
-    if is_talkative(rate):
-        result = Result("Talkative", "Packets Size/Total Time: {:.2f}".format(rate))
-        results.append(result)
-    if is_shy(rate):
-        result = Result("Shy", "Cumulative Packets Size/Total Time: {:.2f}".format(rate))
-        results.append(result)
+        results.append(Result("Talks mainly globally", "Global Packets / All Packets = {:.2f}%".format(l_c_rate[1] * 100)))
+    if is_talkative(rate, heartbeat):
+        results.append(Result("Talkative", "Size / Time = {:.2f}B, Heartbeat = {:.2f}s".format(rate, heartbeat)))
+    if is_neither_talkative_nor_shy(rate, heartbeat):
+        results.append(Result("Neither talkative nor shy", "Size / Time = {:.2f}B, Heartbeat = {:.2f}s".format(rate, heartbeat)))
+    if is_shy(rate, heartbeat):
+        results.append(Result("Shy", "Size / Time = {:.2f}B, Heartbeat = {:.2f}s".format(rate, heartbeat)))
+    print("...Done")
 
 
 def print_tags():
@@ -284,35 +290,52 @@ def print_tags():
     print()
 
 
+def calculate_possibilities():
+    possibilities.append(Possibility("Router", "{:.2f}%".format(check_router(mac, cap) * 100)))
+    possibilities.append(Possibility("Voice", "{:.2f}%".format(check_premium(l_c_rate, protocol_list, rate, heartbeat) * 100)))
+    possibilities.append(Possibility("Bulb", "{:.2f}%".format(check_bulb(l_c_rate, protocol_list) * 100)))
+    possibilities.append(Possibility("Strip", "{:.2f}%".format(check_strip(protocol_list, l_c_rate) * 100)))
+    possibilities.append(Possibility("Camera", "{:.2f}%".format(check_uploader(u_d_rate, rate, protocol_list) * 100)))
+
+
+def print_possibilities():
+    print("Based on the above result, the possible type of device is inferred as follows.")
+    print()
+    print('{:^26s}'.format("Possibility"))
+    print('--------------------------')
+    print('| {:^12s} | {:^7s} |'.format("Device Type", "Number"))
+    print('--------------------------')
+    for possibility in possibilities:
+        print('| {:^12s} | {:^7s} |'.format(possibility.device_type, possibility.number))
+        print('--------------------------')
+
+
 if __name__ == "__main__":
     unfiltered_cap = pyshark.FileCapture(sys.argv[1])
     unfiltered_cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)
     pkt_filter = Filter(unfiltered_cap, unfiltered_cap_sum)
-    results = []
 
     pkt_filter.create_device_list()
     while True:
+        results = []
+        possibilities = []
         pkt_filter.print_device_list()
         pkt_filter.ask_for_device()
         cap, cap_sum = pkt_filter.filter_packets()
         ip = pkt_filter.get_profile_device_ip()
         mac = pkt_filter.get_profile_device_mac()
+        manufacturer = pkt_filter.get_profile_device_manufacturer()
 
         u_d_rate = calculate_u_d_rate(ip, cap)
         protocol_list = generate_protocol_list(cap_sum)
         l_c_rate = calculate_l_c_rate(cap)
         rate = calculate_rate(cap_sum)
+        heartbeat = calculate_heartbeat(cap_sum)
 
-        add_tags()
+        add_tags(manufacturer)
         print_tags()
 
-        print()
-        print("Router Possibility: {:.2f}%".format(check_router(mac, cap) * 100))
-        print("Voice Assistant Possibility: {:.2f}%".format(check_premium(l_c_rate,protocol_list,rate) * 100))
-        print("Bulb Possibility: {:.2f}%".format(check_bulb(l_c_rate,rate,protocol_list) * 100))
-        print("Strip Possibility {:.2f}%".format(check_strip(protocol_list,l_c_rate) * 100))
-        print("Camera Possibility: {:.2f}%".format(check_uploader(u_d_rate,rate,protocol_list) * 100))
-        if check_other(l_c_rate,protocol_list,rate,u_d_rate):
-            print("Other devices Possibility")
+        calculate_possibilities()
+        print_possibilities()
 
         continue_or_exit()
