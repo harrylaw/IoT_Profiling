@@ -41,9 +41,9 @@ def calculate_upload_minus_download_rate(ip, cap):  # use cap
         except AttributeError:
                 pass
 
-    u_rate = upload_size / (upload_size + download_size)
-    d_rate = download_size / (download_size + upload_size)
-    return u_rate - d_rate
+    upload_rate = upload_size / (upload_size + download_size)
+    download_rate = download_size / (download_size + upload_size)
+    return upload_rate - download_rate
 
 
 def calculate_local_and_global_packets_rate(cap):  # use cap
@@ -263,11 +263,11 @@ def add_tags(manufacturer):
     if is_time_synchronizer(protocol_list):
         results.append(Result("Time synchronizer", "Using NTP Protocol"))
     if is_mainly_local(local_rate):
-        results.append(Result("Talks mainly locally", "Local Packets / All Packets = {:.2f}%".format(local_rate * 100)))
+        results.append(Result("Talks mainly locally", "Local Packet Ratio = {:.2f}%".format(local_rate * 100)))
     if is_neither_local_nor_global(local_rate, global_rate):
-        results.append(Result("Talks globally and locally", "Local Packets / All Packets = {:.2f}%".format(local_rate * 100)))
+        results.append(Result("Talks globally and locally", "Local Packet Ratio = {:.2f}%, Global Packet Ratio = {:.2f}%".format(local_rate * 100, global_rate * 100)))
     if is_mainly_global(global_rate):
-        results.append(Result("Talks mainly globally", "Global Packets / All Packets = {:.2f}%".format(global_rate * 100)))
+        results.append(Result("Talks mainly globally", "Global Packet Ratio = {:.2f}%".format(global_rate * 100)))
     if is_talkative(rate, heartbeat):
         results.append(Result("Talkative", "Size / Time = {:.2f}B, Heartbeat = {:.2f}s".format(rate, heartbeat)))
     if is_neither_talkative_nor_shy(rate, heartbeat):
@@ -291,22 +291,22 @@ def print_tags():
 
 def calculate_possibilities():
     possibilities.append(Possibility("Router", "{:.2f}%".format(check_router(mac, cap) * 100)))
-    possibilities.append(Possibility("Voice", "{:.2f}%".format(check_premium(local_rate, global_rate, protocol_list, rate, heartbeat) * 100)))
+    possibilities.append(Possibility("Voice Assistant", "{:.2f}%".format(check_premium(local_rate, global_rate, protocol_list, rate, heartbeat) * 100)))
     possibilities.append(Possibility("Bulb", "{:.2f}%".format(check_bulb(global_rate, protocol_list) * 100)))
     possibilities.append(Possibility("Strip", "{:.2f}%".format(check_strip(protocol_list, local_rate) * 100)))
     possibilities.append(Possibility("Camera", "{:.2f}%".format(check_uploader(upload_minus_download_rate, rate, heartbeat) * 100)))
 
 
 def print_possibilities():
-    print("Based on the above result, the possible type of device is inferred as follows.")
+    print("Based on the above result, possible type of the device is inferred as follows.")
     print()
-    print('{:^26s}'.format("Possibility"))
-    print('--------------------------')
-    print('| {:^12s} | {:^7s} |'.format("Device Type", "Number"))
-    print('--------------------------')
+    print('{:^29s}'.format("Possible Type"))
+    print('-----------------------------')
+    print('| {:^15s} | {:^7s} |'.format("Device Type", "Number"))
+    print('-----------------------------')
     for possibility in possibilities:
-        print('| {:^12s} | {:^7s} |'.format(possibility.device_type, possibility.number))
-        print('--------------------------')
+        print('| {:^15s} | {:^7s} |'.format(possibility.device_type, possibility.number))
+        print('-----------------------------')
 
 
 if __name__ == "__main__":
