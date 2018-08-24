@@ -198,31 +198,31 @@ def is_downloader(dif):
         return 0
 
 
-def check_premium(local_packets_ratio, global_packets_ratio, protocol_list, rate, heartbeat):
-    p_rate = 0.6 * is_neither_local_nor_global(local_packets_ratio, global_packets_ratio) + 0.1 * is_encrypted(protocol_list) + 0.3 * is_talkative(rate, heartbeat)
+def check_premium():
+    p_rate = 0.3 * is_mainly_global(local_ratio, global_ratio) + 0.2 * is_encrypted(protocol_list) + 0.3 * is_talkative(rate, heartbeat) + 0.2 * is_time_synchronizer(protocol_list)
     return p_rate
 
 
-def check_bulb(local_packets_ratio, global_packets_ratio, protocol_list):
-    b_rate = 0.7 * is_mainly_global(local_packets_ratio, global_packets_ratio) + 0.3 * is_iot(protocol_list)
+def check_bulb():
+    b_rate = 0.45 * is_mainly_global(local_ratio, global_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(rate,heartbeat)
     return b_rate
 
 
-def check_strip(local_packets_ratio, global_packets_ratio, protocol_list):
-    s_rate1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
-    s_rate2 = 0.8 * is_mainly_local(local_packets_ratio, global_packets_ratio) + 0.2 * is_iot(protocol_list)
-    if s_rate1 > s_rate2:
-        return s_rate1
+def check_strip():
+    strip_rate1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
+    strip_rate2 = 0.8 * is_neither_local_nor_global(local_ratio, global_ratio) + 0.2 * is_iot(protocol_list)
+    if strip_rate1 > strip_rate2:
+        return strip_rate1
     else:
-        return s_rate2
+        return strip_rate2
 
 
-def check_uploader(upload_minus_download_rate, rate, heartbeat):
+def check_camera():
     u_rate = 0.6 * is_uploader(upload_minus_download_rate) + 0.4 * is_talkative(rate, heartbeat)
     return u_rate
 
 
-def check_router(mac, cap):
+def check_router():
     return has_public_ip(mac, cap)
 
 
@@ -290,11 +290,11 @@ def print_tags():
 
 
 def calculate_possibilities():
-    possibilities.append(Possibility("Router", "{:.2f}%".format(check_router(mac, cap) * 100)))
-    possibilities.append(Possibility("Voice Assistant", "{:.2f}%".format(check_premium(local_ratio, global_ratio, protocol_list, rate, heartbeat) * 100)))
-    possibilities.append(Possibility("Bulb", "{:.2f}%".format(check_bulb(local_ratio, global_ratio, protocol_list) * 100)))
-    possibilities.append(Possibility("Strip", "{:.2f}%".format(check_strip(local_ratio, global_ratio, protocol_list) * 100)))
-    possibilities.append(Possibility("Camera", "{:.2f}%".format(check_uploader(upload_minus_download_rate, rate, heartbeat) * 100)))
+    possibilities.append(Possibility("Router", "{:.2f}%".format(check_router() * 100)))
+    possibilities.append(Possibility("Voice Assistant", "{:.2f}%".format(check_premium() * 100)))
+    possibilities.append(Possibility("Bulb", "{:.2f}%".format(check_bulb() * 100)))
+    possibilities.append(Possibility("Strip", "{:.2f}%".format(check_strip() * 100)))
+    possibilities.append(Possibility("Camera", "{:.2f}%".format(check_camera() * 100)))
 
 
 def print_possibilities():
