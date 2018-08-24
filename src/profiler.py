@@ -142,22 +142,22 @@ def is_unreliable(protocols):
     return 0
 
 
-def is_mainly_local(local_packets_ratio):
-    if local_packets_ratio >= 0.3:
+def is_mainly_local(local_packets_ratio, global_packets_ratio):
+    if local_packets_ratio >= 0.35 and local_packets_ratio - global_packets_ratio >= 0.2:
         return 1
     else:
         return 0
 
 
 def is_neither_local_nor_global(local_packets_ratio, global_packets_ratio):
-    if local_packets_ratio < 0.3 and global_packets_ratio < 0.3:
+    if (local_packets_ratio < 0.35 and global_packets_ratio < 0.35) or abs(local_packets_ratio - global_packets_ratio) < 0.2:
         return 1
     else:
         return 0
 
 
-def is_mainly_global(global_packets_ratio):
-    if global_packets_ratio >= 0.3:
+def is_mainly_global(local_packets_ratio, global_packets_ratio):
+    if global_packets_ratio >= 0.35 and global_packets_ratio - local_packets_ratio >= 0.2:
         return 1
     else:
         return 0
@@ -203,14 +203,14 @@ def check_premium(local_packets_ratio, global_packets_ratio, protocol_list, rate
     return p_rate
 
 
-def check_bulb(global_packets_ratio, protocol_list):
-    b_rate = 0.7 * is_mainly_global(global_packets_ratio) + 0.3 * is_iot(protocol_list)
+def check_bulb(local_packets_ratio, global_packets_ratio, protocol_list):
+    b_rate = 0.7 * is_mainly_global(local_packets_ratio, global_packets_ratio) + 0.3 * is_iot(protocol_list)
     return b_rate
 
 
-def check_strip(protocol_list, local_packets_ratio):
+def check_strip(local_packets_ratio, global_packets_ratio, protocol_list):
     s_rate1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
-    s_rate2 = 0.8 * is_mainly_local(local_packets_ratio) + 0.2 * is_iot(protocol_list)
+    s_rate2 = 0.8 * is_mainly_local(local_packets_ratio, global_packets_ratio) + 0.2 * is_iot(protocol_list)
     if s_rate1 > s_rate2:
         return s_rate1
     else:
@@ -262,12 +262,12 @@ def add_tags(manufacturer):
         results.append(Result("Encrypted", "Using TLSv1 or TLSv1.2 Protocol"))
     if is_time_synchronizer(protocol_list):
         results.append(Result("Time synchronizer", "Using NTP Protocol"))
-    if is_mainly_local(local_ratio):
-        results.append(Result("Talks mainly locally", "Local Packet Ratio = {:.2f}%".format(local_ratio * 100)))
+    if is_mainly_local(local_ratio, global_ratio):
+        results.append(Result("Talks mainly locally", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
     if is_neither_local_nor_global(local_ratio, global_ratio):
-        results.append(Result("Talks globally and locally", "Local Packet Ratio = {:.2f}%, Global Packet Ratio = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
-    if is_mainly_global(global_ratio):
-        results.append(Result("Talks mainly globally", "Global Packet Ratio = {:.2f}%".format(global_ratio * 100)))
+        results.append(Result("Talks globally and locally", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
+    if is_mainly_global(local_ratio, global_ratio):
+        results.append(Result("Talks mainly globally", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
     if is_talkative(rate, heartbeat):
         results.append(Result("Talkative", "Size / Time = {:.2f}B, Heartbeat = {:.2f}s".format(rate, heartbeat)))
     if is_neither_talkative_nor_shy(rate, heartbeat):
@@ -292,8 +292,8 @@ def print_tags():
 def calculate_possibilities():
     possibilities.append(Possibility("Router", "{:.2f}%".format(check_router(mac, cap) * 100)))
     possibilities.append(Possibility("Voice Assistant", "{:.2f}%".format(check_premium(local_ratio, global_ratio, protocol_list, rate, heartbeat) * 100)))
-    possibilities.append(Possibility("Bulb", "{:.2f}%".format(check_bulb(global_ratio, protocol_list) * 100)))
-    possibilities.append(Possibility("Strip", "{:.2f}%".format(check_strip(protocol_list, local_ratio) * 100)))
+    possibilities.append(Possibility("Bulb", "{:.2f}%".format(check_bulb(local_ratio, global_ratio, protocol_list) * 100)))
+    possibilities.append(Possibility("Strip", "{:.2f}%".format(check_strip(local_ratio, global_ratio, protocol_list) * 100)))
     possibilities.append(Possibility("Camera", "{:.2f}%".format(check_uploader(upload_minus_download_rate, rate, heartbeat) * 100)))
 
 
