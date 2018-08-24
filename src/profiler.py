@@ -46,7 +46,7 @@ def calculate_upload_minus_download_rate(ip, cap):  # use cap
     return upload_rate - download_rate
 
 
-def calculate_local_and_global_packets_rate(cap):  # use cap
+def calculate_local_and_global_packets_ratio(cap):  # use cap
     local_packets = 0
     multicast_packets = 0
     global_packets = 0
@@ -327,7 +327,7 @@ if __name__ == "__main__":
 
         upload_minus_download_rate = calculate_upload_minus_download_rate(ip, cap)
         protocol_list = generate_protocol_list(cap_sum)
-        local_ratio, global_ratio = calculate_local_and_global_packets_rate(cap)
+        local_ratio, global_ratio = calculate_local_and_global_packets_ratio(cap)
         rate = calculate_rate(cap_sum)
         heartbeat = calculate_heartbeat(cap_sum)
 
