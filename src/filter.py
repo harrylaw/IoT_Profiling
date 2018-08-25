@@ -20,7 +20,7 @@ class Filter:
         print()
         print('{:^62s}'.format("Device List"))
         print('--------------------------------------------------------------')
-        print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format("No.", "MAC", "IP", "Manufacturer"))
+        print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format("No.", "MAC", "Private IP", "Manufacturer"))
         print('--------------------------------------------------------------')
         for i in range(0, len(self.__device_list)):
             print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format(str(i), str(self.__device_list[i].MAC), str(self.__device_list[i].IP),
