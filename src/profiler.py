@@ -24,7 +24,7 @@ def calculate_heartbeat(cap_sum):  # use cap_sum
     return heartbeat
 
 
-def calculate_upload_minus_download_ratio(ip, cap):  # use cap
+def calculate_upload_and_download_ratio(ip, cap):  # use cap
     upload_size = 0
     download_size = 0
     for pkt in cap:
@@ -33,7 +33,6 @@ def calculate_upload_minus_download_ratio(ip, cap):  # use cap
                 continue
             elif pkt.ip.src == '255.255.255.255' or pkt.ip.dst == '255.255.255.255':
                 continue
-
             elif pkt.ip.src == ip:
                 upload_size = upload_size + int(pkt.length)
             elif pkt.ip.dst == ip:
@@ -43,7 +42,7 @@ def calculate_upload_minus_download_ratio(ip, cap):  # use cap
 
     upload_ratio = upload_size / (upload_size + download_size)
     download_ratio = download_size / (download_size + upload_size)
-    return upload_ratio - download_ratio
+    return upload_ratio, download_ratio
 
 
 def calculate_local_and_global_packets_ratio(cap):  # use cap
@@ -184,15 +183,22 @@ def is_shy(data_rate, heartbeat):
         return 0
 
 
-def is_uploader(dif):
-    if dif > 0 and abs(dif) > 0.45:
+def is_uploader(upload_ratio, download_ratio):
+    if upload_ratio - download_ratio >= 0.45:
         return 1
     else:
         return 0
 
 
-def is_downloader(dif):
-    if dif < 0 and abs(dif) > 0.45:
+def is_neither_uploader_nor_downloader(upload_ratio, download_ratio):
+    if abs(upload_ratio - download_ratio) < 0.45:
+        return 1
+    else:
+        return 0
+
+
+def is_downloader(upload_ratio, download_ratio):
+    if download_ratio - upload_ratio >= 0.45:
         return 1
     else:
         return 0
@@ -218,7 +224,7 @@ def check_strip():
 
 
 def check_camera():
-    camera_possibility = 0.6 * is_uploader(upload_minus_download_ratio) + 0.4 * is_talkative(data_rate, heartbeat)
+    camera_possibility = 0.6 * is_uploader(upload_ratio, download_ratio) + 0.4 * is_talkative(data_rate, heartbeat)
     return camera_possibility
 
 
@@ -246,10 +252,12 @@ def add_tags(manufacturer):
     print("Now profiling: " + manufacturer, end='', flush=True)
     if has_public_ip(mac, cap):
         results.append(Result("Has public IP", "Has public IP associated with MAC"))
-    if is_uploader(upload_minus_download_ratio):
-        results.append(Result("Uploader", "Upload Ratio - Download Ratio = {:.2f}%".format(upload_minus_download_ratio * 100)))
-    if is_downloader(upload_minus_download_ratio):
-        results.append(Result("Downloader", "Upload Ratio - Download Ratio = {:.2f}%".format(upload_minus_download_ratio * 100)))
+    if is_uploader(upload_ratio, download_ratio):
+        results.append(Result("Uploader", "Upload % = {:.2f}%, Download % = {:.2f}%".format(upload_ratio * 100, download_ratio * 100)))
+    if is_neither_uploader_nor_downloader(upload_ratio, download_ratio):
+        results.append(Result("Neither uploader nor downloader", "Upload % = {:.2f}%, Download % = {:.2f}%".format(upload_ratio * 100, download_ratio * 100)))
+    if is_downloader(upload_ratio, download_ratio):
+        results.append(Result("Downloader", "Upload % = {:.2f}%, Download % = {:.2f}%".format(upload_ratio * 100, download_ratio * 100)))
     if is_iot(protocol_list):
         results.append(Result("IoT", "Using MDNS Protocol"))
     if is_unreliable(protocol_list):
@@ -279,13 +287,13 @@ def add_tags(manufacturer):
 
 def print_tags():
     print()
-    print('{:^72s}'.format("Profiling Result"))
-    print('------------------------------------------------------------------------')
-    print('| {:^25s} | {:^40s} |'.format("Tag", "Comment"))
-    print('------------------------------------------------------------------------')
+    print('{:^78s}'.format("Profiling Result"))
+    print('------------------------------------------------------------------------------')
+    print('| {:^31s} | {:^40s} |'.format("Tag", "Comment"))
+    print('------------------------------------------------------------------------------')
     for result in results:
-        print('| {:^25s} | {:^40s} |'.format(result.tag, result.comment))
-        print('------------------------------------------------------------------------')
+        print('| {:^31s} | {:^40s} |'.format(result.tag, result.comment))
+        print('------------------------------------------------------------------------------')
     print()
 
 
@@ -326,7 +334,7 @@ if __name__ == "__main__":
         mac = pkt_filter.get_profile_device_mac()
         manufacturer = pkt_filter.get_profile_device_manufacturer()
 
-        upload_minus_download_ratio = calculate_upload_minus_download_ratio(ip, cap)
+        upload_ratio, download_ratio = calculate_upload_and_download_ratio(ip, cap)
         protocol_list = generate_protocol_list(cap_sum)
         local_ratio, global_ratio = calculate_local_and_global_packets_ratio(cap)
         data_rate = calculate_data_rate(cap_sum)
