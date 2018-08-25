@@ -289,16 +289,17 @@ def print_tags():
     print()
 
 
-def calculate_possibilities():
+def calculate_possibilities(manufacturer):
+    print("Now calculating possibilities for: " + manufacturer, end='', flush=True)
     possibilities.append(Possibility("Router", "{:.2f}%".format(check_router() * 100)))
     possibilities.append(Possibility("Voice Assistant", "{:.2f}%".format(check_premium() * 100)))
     possibilities.append(Possibility("Bulb", "{:.2f}%".format(check_bulb() * 100)))
     possibilities.append(Possibility("Strip", "{:.2f}%".format(check_strip() * 100)))
     possibilities.append(Possibility("Camera", "{:.2f}%".format(check_camera() * 100)))
+    print("...Done")
 
 
 def print_possibilities():
-    print("Based on the above result, possible type of the device is inferred as follows.")
     print()
     print('{:^29s}'.format("Possible Type"))
     print('-----------------------------')
@@ -334,7 +335,7 @@ if __name__ == "__main__":
         add_tags(manufacturer)
         print_tags()
 
-        calculate_possibilities()
+        calculate_possibilities(manufacturer)
         print_possibilities()
 
         continue_or_exit()
