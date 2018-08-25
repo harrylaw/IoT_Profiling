@@ -24,7 +24,7 @@ def calculate_heartbeat(cap_sum):  # use cap_sum
     return heartbeat
 
 
-def calculate_upload_minus_download_rate(ip, cap):  # use cap
+def calculate_upload_minus_download_ratio(ip, cap):  # use cap
     upload_size = 0
     download_size = 0
     for pkt in cap:
@@ -41,9 +41,9 @@ def calculate_upload_minus_download_rate(ip, cap):  # use cap
         except AttributeError:
                 pass
 
-    upload_rate = upload_size / (upload_size + download_size)
-    download_rate = download_size / (download_size + upload_size)
-    return upload_rate - download_rate
+    upload_ratio = upload_size / (upload_size + download_size)
+    download_ratio = download_size / (download_size + upload_size)
+    return upload_ratio - download_ratio
 
 
 def calculate_local_and_global_packets_ratio(cap):  # use cap
@@ -66,15 +66,15 @@ def calculate_local_and_global_packets_ratio(cap):  # use cap
     return local_packets_ratio, global_packets_ratio
 
 
-def calculate_rate(cap_sum):  # use cap_sum
+def calculate_data_rate(cap_sum):  # use cap_sum
     time = []
-    size = 0
+    cumulative_size = 0
     for pkt in cap_sum:
         time.append(pkt.time)
-        size = size + float(pkt.length)
+        cumulative_size = cumulative_size + float(pkt.length)
     total_time = float(time[-1]) - float(time[0])
-    rate = size / total_time
-    return rate
+    data_rate = cumulative_size / total_time
+    return data_rate
 
 
 def generate_protocol_list(cap_sum):  # use cap_sum
@@ -94,7 +94,7 @@ def has_public_ip(mac, cap):
             if (pkt.eth.src == mac and ipaddress.ip_address(pkt.ip.src).is_global) or (
                     pkt.eth.dst == mac and ipaddress.ip_address(pkt.ip.dst).is_global):
                 return 1
-        except AttributeError as e:
+        except AttributeError:
             pass
     else:
         return 0
@@ -163,22 +163,22 @@ def is_mainly_global(local_packets_ratio, global_packets_ratio):
         return 0
 
 
-def is_talkative(rate, heartbeat):
-    if rate > 500 and heartbeat < 1:
+def is_talkative(data_rate, heartbeat):
+    if data_rate > 500 and heartbeat < 1:
         return 1
     else:
         return 0
 
 
-def is_neither_talkative_nor_shy(rate, heartbeat):
-    if 90 <= rate <= 500 or 1 <= heartbeat <= 3:
+def is_neither_talkative_nor_shy(data_rate, heartbeat):
+    if 90 <= data_rate <= 500 or 1 <= heartbeat <= 3:
         return 1
     else:
         return 0
 
 
-def is_shy(rate, heartbeat):
-    if rate < 90 and heartbeat > 3:
+def is_shy(data_rate, heartbeat):
+    if data_rate < 90 and heartbeat > 3:
         return 1
     else:
         return 0
@@ -199,27 +199,27 @@ def is_downloader(dif):
 
 
 def check_premium():
-    p_rate = 0.3 * is_mainly_global(local_ratio, global_ratio) + 0.2 * is_encrypted(protocol_list) + 0.3 * is_talkative(rate, heartbeat) + 0.2 * is_time_synchronizer(protocol_list)
-    return p_rate
+    premium_possibility = 0.3 * is_mainly_global(local_ratio, global_ratio) + 0.2 * is_encrypted(protocol_list) + 0.3 * is_talkative(data_rate, heartbeat) + 0.2 * is_time_synchronizer(protocol_list)
+    return premium_possibility
 
 
 def check_bulb():
-    b_rate = 0.45 * is_mainly_global(local_ratio, global_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(rate,heartbeat)
-    return b_rate
+    bulb_possibility = 0.45 * is_mainly_global(local_ratio, global_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(data_rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(data_rate,heartbeat)
+    return bulb_possibility
 
 
 def check_strip():
-    strip_rate1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
-    strip_rate2 = 0.8 * is_neither_local_nor_global(local_ratio, global_ratio) + 0.2 * is_iot(protocol_list)
-    if strip_rate1 > strip_rate2:
-        return strip_rate1
+    strip_possibility1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
+    strip_possibility2 = 0.8 * is_neither_local_nor_global(local_ratio, global_ratio) + 0.2 * is_iot(protocol_list)
+    if strip_possibility1 > strip_possibility2:
+        return strip_possibility1
     else:
-        return strip_rate2
+        return strip_possibility2
 
 
 def check_camera():
-    u_rate = 0.6 * is_uploader(upload_minus_download_rate) + 0.4 * is_talkative(rate, heartbeat)
-    return u_rate
+    camera_possibility = 0.6 * is_uploader(upload_minus_download_ratio) + 0.4 * is_talkative(data_rate, heartbeat)
+    return camera_possibility
 
 
 def check_router():
@@ -246,10 +246,10 @@ def add_tags(manufacturer):
     print("Now profiling: " + manufacturer, end='', flush=True)
     if has_public_ip(mac, cap):
         results.append(Result("Has public IP", "Has public IP associated with MAC"))
-    if is_uploader(upload_minus_download_rate):
-        results.append(Result("Uploader", "Upload Rate - Download Rate = {:.2f}%".format(upload_minus_download_rate * 100)))
-    if is_downloader(upload_minus_download_rate):
-        results.append(Result("Downloader", "Upload Rate - Download Rate = {:.2f}%".format(upload_minus_download_rate * 100)))
+    if is_uploader(upload_minus_download_ratio):
+        results.append(Result("Uploader", "Upload Ratio - Download Ratio = {:.2f}%".format(upload_minus_download_ratio * 100)))
+    if is_downloader(upload_minus_download_ratio):
+        results.append(Result("Downloader", "Upload Ratio - Download Ratio = {:.2f}%".format(upload_minus_download_ratio * 100)))
     if is_iot(protocol_list):
         results.append(Result("IoT", "Using MDNS Protocol"))
     if is_unreliable(protocol_list):
@@ -268,12 +268,12 @@ def add_tags(manufacturer):
         results.append(Result("Talks globally and locally", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
     if is_mainly_global(local_ratio, global_ratio):
         results.append(Result("Talks mainly globally", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
-    if is_talkative(rate, heartbeat):
-        results.append(Result("Talkative", "Size / Time = {:.2f}B, Heartbeat = {:.2f}s".format(rate, heartbeat)))
-    if is_neither_talkative_nor_shy(rate, heartbeat):
-        results.append(Result("Neither talkative nor shy", "Size / Time = {:.2f}B, Heartbeat = {:.2f}s".format(rate, heartbeat)))
-    if is_shy(rate, heartbeat):
-        results.append(Result("Shy", "Size / Time = {:.2f}B, Heartbeat = {:.2f}s".format(rate, heartbeat)))
+    if is_talkative(data_rate, heartbeat):
+        results.append(Result("Talkative", "Data Rate = {:.2f}B/s, Heartbeat = {:.2f}s".format(data_rate, heartbeat)))
+    if is_neither_talkative_nor_shy(data_rate, heartbeat):
+        results.append(Result("Neither talkative nor shy", "Data Rate = {:.2f}B/s, Heartbeat = {:.2f}s".format(data_rate, heartbeat)))
+    if is_shy(data_rate, heartbeat):
+        results.append(Result("Shy", "Data Rate = {:.2f}B/s, Heartbeat = {:.2f}s".format(data_rate, heartbeat)))
     print("...Done")
 
 
@@ -326,10 +326,10 @@ if __name__ == "__main__":
         mac = pkt_filter.get_profile_device_mac()
         manufacturer = pkt_filter.get_profile_device_manufacturer()
 
-        upload_minus_download_rate = calculate_upload_minus_download_rate(ip, cap)
+        upload_minus_download_ratio = calculate_upload_minus_download_ratio(ip, cap)
         protocol_list = generate_protocol_list(cap_sum)
         local_ratio, global_ratio = calculate_local_and_global_packets_ratio(cap)
-        rate = calculate_rate(cap_sum)
+        data_rate = calculate_data_rate(cap_sum)
         heartbeat = calculate_heartbeat(cap_sum)
 
         add_tags(manufacturer)
