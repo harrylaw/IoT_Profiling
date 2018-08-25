@@ -141,25 +141,26 @@ def is_unreliable(protocols):
     return 0
 
 
-def is_mainly_local(local_packets_ratio, global_packets_ratio):
-    if local_packets_ratio >= 0.35 and local_packets_ratio - global_packets_ratio >= 0.2:
+def is_low_LocalRate(local_packets_ratio, global_packets_ratio):
+    if local_packets_ratio< 0.1:
         return 1
     else:
         return 0
 
 
-def is_neither_local_nor_global(local_packets_ratio, global_packets_ratio):
-    if (local_packets_ratio < 0.35 and global_packets_ratio < 0.35) or abs(local_packets_ratio - global_packets_ratio) < 0.2:
+def is_medium_LocalRate(local_packets_ratio, global_packets_ratio):
+    if 0.1<=local_packets_ratio<=0.3:
         return 1
     else:
         return 0
 
 
-def is_mainly_global(local_packets_ratio, global_packets_ratio):
-    if global_packets_ratio >= 0.35 and global_packets_ratio - local_packets_ratio >= 0.2:
+def is_high_LocalRate(local_packets_ratio, global_packets_ratio):
+    if local_packets_ratio>0.3:
         return 1
     else:
         return 0
+
 
 
 def is_talkative(data_rate, heartbeat):
@@ -205,18 +206,18 @@ def is_downloader(upload_ratio, download_ratio):
 
 
 def check_premium():
-    premium_possibility = 0.3 * is_mainly_global(local_ratio, global_ratio) + 0.2 * is_encrypted(protocol_list) + 0.3 * is_talkative(data_rate, heartbeat) + 0.2 * is_time_synchronizer(protocol_list)
+    premium_possibility = 0.5 * is_medium_LocalRate(local_ratio, global_ratio) + 0.15 * is_encrypted(protocol_list) + 0.2 * is_talkative(data_rate, heartbeat) + 0.15 * is_time_synchronizer(protocol_list)
     return premium_possibility
 
 
 def check_bulb():
-    bulb_possibility = 0.45 * is_mainly_global(local_ratio, global_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(data_rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(data_rate,heartbeat)
+    bulb_possibility = 0.45 * is_low_LocalRate(local_ratio, global_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(data_rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(data_rate,heartbeat)
     return bulb_possibility
 
 
 def check_strip():
     strip_possibility1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
-    strip_possibility2 = 0.8 * is_neither_local_nor_global(local_ratio, global_ratio) + 0.2 * is_iot(protocol_list)
+    strip_possibility2 = 0.8 * is_high_LocalRate(local_ratio, global_ratio) + 0.2 * is_iot(protocol_list)
     if strip_possibility1 > strip_possibility2:
         return strip_possibility1
     else:
@@ -270,12 +271,12 @@ def add_tags(manufacturer):
         results.append(Result("Encrypted", "Using TLSv1 or TLSv1.2 Protocol"))
     if is_time_synchronizer(protocol_list):
         results.append(Result("Time synchronizer", "Using NTP Protocol"))
-    if is_mainly_local(local_ratio, global_ratio):
-        results.append(Result("Talks mainly locally", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
-    if is_neither_local_nor_global(local_ratio, global_ratio):
-        results.append(Result("Talks globally and locally", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
-    if is_mainly_global(local_ratio, global_ratio):
-        results.append(Result("Talks mainly globally", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
+    if is_high_LocalRate(local_ratio, global_ratio):
+        results.append(Result("Has High Rate for Local Packets", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
+    if is_medium_LocalRate(local_ratio, global_ratio):
+        results.append(Result("Has Medium Rate for Local Packets", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
+    if is_low_LocalRate(local_ratio, global_ratio):
+        results.append(Result("Has Low Rate for Local Packets", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
     if is_talkative(data_rate, heartbeat):
         results.append(Result("Talkative", "Data Rate = {:.2f}B/s, Heartbeat = {:.2f}s".format(data_rate, heartbeat)))
     if is_neither_talkative_nor_shy(data_rate, heartbeat):
