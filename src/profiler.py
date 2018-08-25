@@ -237,10 +237,10 @@ def continue_or_exit():
         try:
             print()
             choice = input("Do you want to profile another device in the same .pcap file? (y/n) ")
-            if choice == 'y':
+            if choice == 'y' or choice == 'Y':
                 return
-            elif choice == 'n':
-                print("Goodbye!")
+            elif choice == 'n' or choice == 'N':
+                print("Thanks for using. Goodbye!")
                 exit()
             else:
                 raise ValueError

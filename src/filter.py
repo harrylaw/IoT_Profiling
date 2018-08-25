@@ -26,6 +26,7 @@ class Filter:
             print('| {:^3s} | {:^17s} | {:^15s} | {:^14s} |'.format(str(i), str(self.__device_list[i].MAC), str(self.__device_list[i].IP),
                                                                     str(self.__device_list[i].Manufacturer)))
             print('--------------------------------------------------------------')
+        print("Note: Devices without a private IP address are struck out from the list.")
         print()
 
     def ask_for_device(self):
