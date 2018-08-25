@@ -87,6 +87,19 @@ def generate_protocol_list(cap_sum):  # use cap_sum
     return protocols
 
 
+def use_tuya_api(cap):  # use cap
+    for pkt in cap:
+        try:
+            protocol = pkt.transport_layer
+            dst_port = pkt[pkt.transport_layer].dstport
+            if protocol == "UDP" and dst_port == "6666":
+                return 1
+        except AttributeError:  # ignore packets that aren't TCP/UDP or IPv4
+            pass
+    else:
+        return 0
+
+
 def has_public_ip(mac, cap):
     for pkt in cap:
         try:
@@ -141,26 +154,25 @@ def is_unreliable(protocols):
     return 0
 
 
-def is_low_LocalRate(local_packets_ratio, global_packets_ratio):
-    if local_packets_ratio< 0.1:
+def is_low_local_ratio(local_packets_ratio):
+    if local_packets_ratio < 0.1:
         return 1
     else:
         return 0
 
 
-def is_medium_LocalRate(local_packets_ratio, global_packets_ratio):
-    if 0.1<=local_packets_ratio<=0.3:
+def is_medium_local_ratio(local_packets_ratio):
+    if 0.1 <= local_packets_ratio <= 0.3:
         return 1
     else:
         return 0
 
 
-def is_high_LocalRate(local_packets_ratio, global_packets_ratio):
-    if local_packets_ratio>0.3:
+def is_high_local_ratio(local_packets_ratio):
+    if local_packets_ratio > 0.3:
         return 1
     else:
         return 0
-
 
 
 def is_talkative(data_rate, heartbeat):
@@ -206,18 +218,18 @@ def is_downloader(upload_ratio, download_ratio):
 
 
 def check_premium():
-    premium_possibility = 0.5 * is_medium_LocalRate(local_ratio, global_ratio) + 0.15 * is_encrypted(protocol_list) + 0.2 * is_talkative(data_rate, heartbeat) + 0.15 * is_time_synchronizer(protocol_list)
+    premium_possibility = 0.5 * is_medium_local_ratio(local_ratio) + 0.15 * is_encrypted(protocol_list) + 0.2 * is_talkative(data_rate, heartbeat) + 0.15 * is_time_synchronizer(protocol_list)
     return premium_possibility
 
 
 def check_bulb():
-    bulb_possibility = 0.45 * is_low_LocalRate(local_ratio, global_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(data_rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(data_rate,heartbeat)
+    bulb_possibility = 0.45 * is_low_local_ratio(local_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(data_rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(data_rate,heartbeat)
     return bulb_possibility
 
 
 def check_strip():
     strip_possibility1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
-    strip_possibility2 = 0.8 * is_high_LocalRate(local_ratio, global_ratio) + 0.2 * is_iot(protocol_list)
+    strip_possibility2 = 0.8 * is_high_local_ratio(local_ratio) + 0.2 * is_iot(protocol_list)
     if strip_possibility1 > strip_possibility2:
         return strip_possibility1
     else:
@@ -251,6 +263,8 @@ def continue_or_exit():
 
 def add_tags(manufacturer):
     print("Now profiling: " + manufacturer, end='', flush=True)
+    if use_tuya_api(cap):
+        results.append(Result("Tuya IoT Platform", "Using Tuya API"))
     if has_public_ip(mac, cap):
         results.append(Result("Has public IP", "Has public IP associated with MAC"))
     if is_uploader(upload_ratio, download_ratio):
@@ -266,17 +280,17 @@ def add_tags(manufacturer):
     if is_lightweight(protocol_list):
         results.append(Result("Lightweight", "Using MQTT Protocol"))
     if is_upnp(protocol_list):
-        results.append(Result("Universal Plug and Play", "Using SSDP Protocol"))
+        results.append(Result("Universal plug and play", "Using SSDP Protocol"))
     if is_encrypted(protocol_list):
         results.append(Result("Encrypted", "Using TLSv1 or TLSv1.2 Protocol"))
     if is_time_synchronizer(protocol_list):
         results.append(Result("Time synchronizer", "Using NTP Protocol"))
-    if is_high_LocalRate(local_ratio, global_ratio):
-        results.append(Result("Has High Rate for Local Packets", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
-    if is_medium_LocalRate(local_ratio, global_ratio):
-        results.append(Result("Has Medium Rate for Local Packets", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
-    if is_low_LocalRate(local_ratio, global_ratio):
-        results.append(Result("Has Low Rate for Local Packets", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
+    if is_high_local_ratio(local_ratio):
+        results.append(Result("High local packets ratio", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
+    if is_medium_local_ratio(local_ratio):
+        results.append(Result("Medium local packets ratio", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
+    if is_low_local_ratio(local_ratio):
+        results.append(Result("Low local packets ratio", "Local % = {:.2f}%, Global % = {:.2f}%".format(local_ratio * 100, global_ratio * 100)))
     if is_talkative(data_rate, heartbeat):
         results.append(Result("Talkative", "Data Rate = {:.2f}B/s, Heartbeat = {:.2f}s".format(data_rate, heartbeat)))
     if is_neither_talkative_nor_shy(data_rate, heartbeat):
