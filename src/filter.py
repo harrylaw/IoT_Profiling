@@ -16,6 +16,62 @@ class Filter:
         self.cap = cap
         self.cap_sum = cap_sum
 
+    def create_device_list(self):
+        device_list_unfiltered = []
+        print("Please wait while we generate the device list.")
+        mac_parser = manuf.MacParser(update=True)
+
+        for pkt in self.cap:
+            for device in device_list_unfiltered:
+                if device.MAC == pkt.eth.src:
+                    try:
+                        if device.IP == "" and pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
+                            device.IP = pkt.ip.src
+                    except AttributeError:
+                        pass
+                    break
+            else:
+                manufacturer = str(mac_parser.get_manuf(pkt.eth.src))
+                if manufacturer != "None":
+                    new_device = Device()
+                    new_device.MAC = pkt.eth.src
+                    new_device.Manufacturer = manufacturer
+                    try:
+                        if pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
+                            new_device.IP = pkt.ip.src
+                        else:
+                            raise AttributeError
+                    except AttributeError:
+                        new_device.IP = ""
+                    device_list_unfiltered.append(new_device)
+
+            for device in device_list_unfiltered:
+                if device.MAC == pkt.eth.dst:
+                    try:
+                        if device.IP == "" and pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
+                            device.IP = pkt.ip.dst
+                    except AttributeError:
+                        pass
+                    break
+            else:
+                manufacturer = str(mac_parser.get_manuf(pkt.eth.dst))
+                if manufacturer != "None":
+                    new_device = Device()
+                    new_device.MAC = pkt.eth.dst
+                    new_device.Manufacturer = manufacturer
+                    try:
+                        if pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
+                            new_device.IP = pkt.ip.dst
+                        else:
+                            raise AttributeError
+                    except AttributeError:
+                        new_device.IP = ""
+                    device_list_unfiltered.append(new_device)
+
+        for device in device_list_unfiltered:
+            if device.IP != "":
+                self.__device_list.append(device)
+
     def print_device_list(self):
         print()
         print('{:^62s}'.format("Device List"))
@@ -40,62 +96,6 @@ class Filter:
                 return
             except ValueError:
                 print("Invalid input! Please try again.")
-
-    def create_device_list(self):
-        device_list_unfiltered = []
-        print("Please wait while we generate the device list.")
-        mac_parser = manuf.MacParser(update=True)
-
-        for pkt in self.cap:
-                for device in device_list_unfiltered:
-                    if device.MAC == pkt.eth.src:
-                        try:
-                            if device.IP == "" and pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
-                                device.IP = pkt.ip.src
-                        except AttributeError:
-                            pass
-                        break
-                else:
-                    manufacturer = str(mac_parser.get_manuf(pkt.eth.src))
-                    if manufacturer != "None":
-                        new_device = Device()
-                        new_device.MAC = pkt.eth.src
-                        new_device.Manufacturer = manufacturer
-                        try:
-                            if pkt.ip.src != "0.0.0.0" and ipaddress.ip_address(pkt.ip.src).is_private:
-                                new_device.IP = pkt.ip.src
-                            else:
-                                raise AttributeError
-                        except AttributeError:
-                            new_device.IP = ""
-                        device_list_unfiltered.append(new_device)
-
-                for device in device_list_unfiltered:
-                    if device.MAC == pkt.eth.dst:
-                        try:
-                            if device.IP == "" and pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
-                                device.IP = pkt.ip.dst
-                        except AttributeError:
-                            pass
-                        break
-                else:
-                    manufacturer = str(mac_parser.get_manuf(pkt.eth.dst))
-                    if manufacturer != "None":
-                        new_device = Device()
-                        new_device.MAC = pkt.eth.dst
-                        new_device.Manufacturer = manufacturer
-                        try:
-                            if pkt.ip.dst != "0.0.0.0" and ipaddress.ip_address(pkt.ip.dst).is_private:
-                                new_device.IP = pkt.ip.dst
-                            else:
-                                raise AttributeError
-                        except AttributeError:
-                            new_device.IP = ""
-                        device_list_unfiltered.append(new_device)
-
-        for device in device_list_unfiltered:
-            if device.IP != "":
-                self.__device_list.append(device)
 
     def filter_packets(self):
         filtered_cap = []
