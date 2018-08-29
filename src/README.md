@@ -1,7 +1,7 @@
 # Usage
 *requires python 3 or later version of python
 
-**1. Profile devices from a .pcap file:**
+**1. Profiler devices from a .pcap file:**
 
     python3 profile.py <path_to_pcag_file>
 
