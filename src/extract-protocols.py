@@ -48,21 +48,23 @@ def calculate_average_length():
 def format_print():
     total_number = 0
     total_length = 0
+    print("...Done")
+    print()
+    print("{:^66s}".format("Protocol List"))
     print('------------------------------------------------------------------')
     print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format("Protocol", "Number", "Length", "Avg Length",
                                                                        "Percentage"))
     print('------------------------------------------------------------------')
     for i in range(0, len(protocols)):
-        print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format(str(protocols[i]), str(numbers[i]),
-                                                                           str(lengths[i]), str(average_lengths[i]),
-                                                                           str(percentages[i])))
+        print('| {:^10s} | {:^10s} | {:^10s} | {:^10s} | {:^10s} |'.format(str(protocols[i]), str(numbers[i]), str(lengths[i]), str(average_lengths[i]), str(percentages[i])))
         print('------------------------------------------------------------------')
         total_number = total_number + numbers[i]
         total_length = total_length + lengths[i]
-    print('Overall Average Length: ', '{:.2f}'.format(total_length/total_number))
+    print('Overall Average Packet Length: ' + '{:.2f}B'.format(total_length/total_number))
 
 
-def create_list(cap):
+def create_list(cap, manufacturer):
+    print("Extracting protocols for: " + manufacturer, end='', flush=True)
     for pkt in cap:
         for i in range(0, len(protocols)):
             if protocols[i] == pkt.protocol:
@@ -80,20 +82,50 @@ def calculate_percentage():
     for i in range(0, len(numbers)):
         total_number = total_number + numbers[i]
     for i in range(0, len(protocols)):
-        percentages.append('{:.4f}'.format(numbers[i]/total_number))
+        percentages.append("{:.2f}%".format(numbers[i]/total_number * 100))
 
 
-def extract_protocols(cap):
-    create_list(cap)
+def extract_protocols(cap, manufacturer):
+    create_list(cap, manufacturer)
     quick_sort(protocols, numbers, lengths, 0, len(protocols) - 1)
     calculate_average_length()
     calculate_percentage()
     format_print()
 
 
+def continue_or_exit():
+    while True:
+        try:
+            print()
+            choice = input("Do you want to profile another device in the same .pcap file? (y/n) ")
+            if choice == 'y' or choice == 'Y':
+                return
+            elif choice == 'n' or choice == 'N':
+                print("Thanks for using. Goodbye!")
+                exit()
+            else:
+                raise ValueError
+        except ValueError:
+            print("Invalid input! Please try again.")
+
+
 if __name__ == "__main__":
     import pyshark
     import sys
+    from filter import Filter
 
-    cap = pyshark.FileCapture(sys.argv[1], only_summaries=True)  # should use only_summaries
-    extract_protocols(cap)
+    unfiltered_cap_sum = pyshark.FileCapture(sys.argv[1], only_summaries=True)  # should use only_summaries
+    unfiltered_cap = pyshark.FileCapture(sys.argv[1])
+    pkt_filter = Filter(unfiltered_cap, unfiltered_cap_sum)
+
+    pkt_filter.create_device_list()
+    while True:
+        pkt_filter.print_device_list()
+        pkt_filter.ask_for_device()
+        cap, cap_sum = pkt_filter.filter_packets()
+        ip = pkt_filter.get_profile_device_ip()
+        mac = pkt_filter.get_profile_device_mac()
+        manufacturer = pkt_filter.get_profile_device_manufacturer()
+        extract_protocols(cap_sum, manufacturer)
+
+        continue_or_exit()
