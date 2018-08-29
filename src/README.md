@@ -1,9 +1,9 @@
 # Usage
 *requires python 3 or later version of python
 
-**1. Profiler devices from a .pcap file:**
+**1. Profile devices from a .pcap file:**
 
-    python3 profile.py <path_to_pcag_file>
+    python3 profiler.py <path_to_pcag_file>
 
 **2. Extract protocols from a .pcap file:**
 
