@@ -10,10 +10,10 @@ class Result:
         self.comment = comment
 
 
-class Possibility:
-    def __init__(self, device_type, number):
+class Probability:
+    def __init__(self, device_type, value):
         self.device_type = device_type
-        self.number = number
+        self.value = value
 
 
 def calculate_heartbeat(cap_sum):  # use cap_sum
@@ -221,36 +221,36 @@ def check_premium():
     if has_public_ip(mac, cap):
         return 0
     else:
-        premium_possibility = 0.5 * is_medium_local_ratio(local_ratio) + 0.15 * is_encrypted(protocol_list) + 0.2 * is_talkative(data_rate, heartbeat) + 0.15 * is_time_synchronizer(protocol_list)
-        return premium_possibility
+        premium_probability = 0.5 * is_medium_local_ratio(local_ratio) + 0.15 * is_encrypted(protocol_list) + 0.2 * is_talkative(data_rate, heartbeat) + 0.15 * is_time_synchronizer(protocol_list)
+        return premium_probability
 
 
 def check_bulb():
     if has_public_ip(mac, cap):
         return 0
     else:
-        bulb_possibility = 0.45 * is_low_local_ratio(local_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(data_rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(data_rate,heartbeat)
-        return bulb_possibility
+        bulb_probability = 0.45 * is_low_local_ratio(local_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(data_rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(data_rate,heartbeat)
+        return bulb_probability
 
 
 def check_strip():
     if has_public_ip(mac, cap):
         return 0
     else:
-        strip_possibility1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
-        strip_possibility2 = 0.8 * is_high_local_ratio(local_ratio) + 0.2 * is_iot(protocol_list)
-        if strip_possibility1 > strip_possibility2:
-            return strip_possibility1
+        strip_probability1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
+        strip_probability2 = 0.8 * is_high_local_ratio(local_ratio) + 0.2 * is_iot(protocol_list)
+        if strip_probability1 > strip_probability2:
+            return strip_probability1
         else:
-            return strip_possibility2
+            return strip_probability2
 
 
 def check_camera():
     if has_public_ip(mac, cap):
         return 0
     else:
-        camera_possibility = 0.6 * is_uploader(upload_ratio, download_ratio) + 0.4 * is_talkative(data_rate, heartbeat)
-        return camera_possibility
+        camera_probability = 0.6 * is_uploader(upload_ratio, download_ratio) + 0.4 * is_talkative(data_rate, heartbeat)
+        return camera_probability
 
 
 def check_router():
@@ -324,24 +324,24 @@ def print_tags():
     print()
 
 
-def calculate_possibilities(manufacturer):
-    print("Now calculating possibilities for: " + manufacturer, end='', flush=True)
-    possibilities.append(Possibility("Router", "{:.2f}%".format(check_router() * 100)))
-    possibilities.append(Possibility("Voice Assistant", "{:.2f}%".format(check_premium() * 100)))
-    possibilities.append(Possibility("Bulb", "{:.2f}%".format(check_bulb() * 100)))
-    possibilities.append(Possibility("Strip", "{:.2f}%".format(check_strip() * 100)))
-    possibilities.append(Possibility("Camera", "{:.2f}%".format(check_camera() * 100)))
+def calculate_probabilities(manufacturer):
+    print("Now calculating probabilities for: " + manufacturer, end='', flush=True)
+    probabilities.append(Probability("Router", "{:.2f}%".format(check_router() * 100)))
+    probabilities.append(Probability("Voice Assistant", "{:.2f}%".format(check_premium() * 100)))
+    probabilities.append(Probability("Bulb", "{:.2f}%".format(check_bulb() * 100)))
+    probabilities.append(Probability("Strip", "{:.2f}%".format(check_strip() * 100)))
+    probabilities.append(Probability("Camera", "{:.2f}%".format(check_camera() * 100)))
     print("...Done")
 
 
-def print_possibilities():
+def print_probabilities():
     print()
-    print('{:^29s}'.format("Possible Type"))
+    print('{:^29s}'.format("Probable Type"))
     print('-----------------------------')
-    print('| {:^15s} | {:^7s} |'.format("Device Type", "Number"))
+    print('| {:^15s} | {:^7s} |'.format("Device Type", "Value"))
     print('-----------------------------')
-    for possibility in possibilities:
-        print('| {:^15s} | {:^7s} |'.format(possibility.device_type, possibility.number))
+    for probability in probabilities:
+        print('| {:^15s} | {:^7s} |'.format(probability.device_type, probability.value))
         print('-----------------------------')
 
 
@@ -353,7 +353,7 @@ if __name__ == "__main__":
     pkt_filter.create_device_list()
     while True:
         results = []
-        possibilities = []
+        probabilities = []
         pkt_filter.print_device_list()
         pkt_filter.ask_for_device()
         cap, cap_sum = pkt_filter.filter_packets()
@@ -370,7 +370,7 @@ if __name__ == "__main__":
         add_tags(manufacturer)
         print_tags()
 
-        calculate_possibilities(manufacturer)
-        print_possibilities()
+        calculate_probabilities(manufacturer)
+        print_probabilities()
 
         continue_or_exit()
