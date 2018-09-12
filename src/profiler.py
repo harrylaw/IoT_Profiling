@@ -221,7 +221,8 @@ def check_premium():
     if has_public_ip(mac, cap):
         return 0
     else:
-        premium_probability = 0.5 * is_medium_local_ratio(local_ratio) + 0.15 * is_encrypted(protocol_list) + 0.2 * is_talkative(data_rate, heartbeat) + 0.15 * is_time_synchronizer(protocol_list)
+        premium_probability = 0.5 * is_medium_local_ratio(local_ratio) + 0.15 * is_encrypted(protocol_list) \
+                              + 0.2 * is_talkative(data_rate, heartbeat) + 0.15 * is_time_synchronizer(protocol_list)
         return premium_probability
 
 
@@ -229,7 +230,9 @@ def check_bulb():
     if has_public_ip(mac, cap):
         return 0
     else:
-        bulb_probability = 0.45 * is_low_local_ratio(local_ratio) + 0.35 * is_iot(protocol_list) + 0.2 * is_shy(data_rate, heartbeat) + 0.2 * is_neither_talkative_nor_shy(data_rate,heartbeat)
+        bulb_probability = 0.45 * is_low_local_ratio(local_ratio) + 0.35 * is_iot(protocol_list) \
+                           + 0.2 * is_shy(data_rate, heartbeat) \
+                           + 0.2 * is_neither_talkative_nor_shy(data_rate, heartbeat)
         return bulb_probability
 
 
@@ -237,7 +240,8 @@ def check_strip():
     if has_public_ip(mac, cap):
         return 0
     else:
-        strip_probability1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) + 0.1 * is_iot(protocol_list)
+        strip_probability1 = 0.8 * is_lightweight(protocol_list) + 0.1 * is_unreliable(protocol_list) \
+                             + 0.1 * is_iot(protocol_list)
         strip_probability2 = 0.8 * is_high_local_ratio(local_ratio) + 0.2 * is_iot(protocol_list)
         if strip_probability1 > strip_probability2:
             return strip_probability1
